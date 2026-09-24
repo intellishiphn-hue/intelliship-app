@@ -1,8 +1,8 @@
 rules_version = '2';
 
 // Reglas base: nada es publico. Todo requiere sesion iniciada (Firebase Auth).
-// Se iran afinando por coleccion (roles admin/coordinador/empleado) a medida
-// que migremos cada modulo (RRHH, Carga China, Bodega, Guias, Buzon).
+// Se iran afinando por rol (admin/coordinador/empleado) a medida que
+// migremos cada modulo (RRHH, Carga China, Bodega, Guias, Buzon).
 service cloud.firestore {
   match /databases/{database}/documents {
 
@@ -12,6 +12,13 @@ service cloud.firestore {
 
     match /{document=**} {
       allow read, write: if false;
+    }
+
+    // Rol de cada usuario (admin/coordinador/empleado). Por ahora cualquier
+    // usuario autenticado puede leer/escribir; se restringe mas adelante
+    // cuando tengamos gestion de roles desde el panel.
+    match /usuarios/{uid} {
+      allow read, write: if estaAutenticado();
     }
 
     match /empleados/{empleadoId} {

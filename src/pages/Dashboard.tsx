@@ -1,26 +1,41 @@
+import { useEffect, useState } from 'react'
+import { collection, onSnapshot } from 'firebase/firestore'
+import { db } from '../lib/firebase'
+import { useAuth } from '../contexts/AuthContext'
 import './Dashboard.css'
 
-type Kpi = {
-  label: string
-  value: string
-  tone: 'blue' | 'green' | 'orange' | 'purple'
-  icon: string
-}
-
-const KPIS: Kpi[] = [
-  { label: 'Total empleados', value: '11', tone: 'blue', icon: '👥' },
-  { label: 'Activos hoy', value: '9', tone: 'green', icon: '✅' },
-  { label: 'Ausencias hoy', value: '1', tone: 'orange', icon: '⚠️' },
-  { label: 'Vacaciones activas', value: '2', tone: 'purple', icon: '🌴' },
-]
+const HOY = new Date().toLocaleDateString('es-HN', {
+  weekday: 'long',
+  day: 'numeric',
+  month: 'long',
+})
 
 export default function Dashboard() {
+  const { user } = useAuth()
+  const [totalEmpleados, setTotalEmpleados] = useState<number | null>(null)
+
+  useEffect(() => {
+    const unsub = onSnapshot(collection(db, 'empleados'), (snap) => {
+      setTotalEmpleados(snap.size)
+    })
+    return unsub
+  }, [])
+
+  const nombre = user?.email?.split('@')[0] ?? ''
+
+  const kpis = [
+    { label: 'Total empleados', value: totalEmpleados === null ? '—' : String(totalEmpleados), tone: 'blue', icon: '👥' },
+    { label: 'Activos hoy', value: '—', tone: 'green', icon: '✅' },
+    { label: 'Ausencias hoy', value: '—', tone: 'orange', icon: '⚠️' },
+    { label: 'Vacaciones activas', value: '—', tone: 'purple', icon: '🌴' },
+  ] as const
+
   return (
     <div className="dash">
       <div className="dash-head">
         <div>
-          <h1>Buenos dias, Sergio</h1>
-          <p>jueves, 24 de septiembre &middot; Resumen de INTELLISHIP</p>
+          <h1>Buenos dias{nombre ? `, ${nombre}` : ''}</h1>
+          <p>{HOY} &middot; Resumen de INTELLISHIP</p>
         </div>
         <div className="dash-actions">
           <button className="btn-ghost">Personalizar</button>
@@ -48,7 +63,7 @@ export default function Dashboard() {
       </div>
 
       <div className="kpi-row">
-        {KPIS.map((k) => (
+        {kpis.map((k) => (
           <div className="kpi-card" key={k.label}>
             <div className="kpi-top">
               <span className="kpi-label">{k.label}</span>

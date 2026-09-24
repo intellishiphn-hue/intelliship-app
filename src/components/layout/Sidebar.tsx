@@ -1,4 +1,5 @@
 import { NavLink } from 'react-router-dom'
+import { useAuth } from '../../contexts/AuthContext'
 import './Sidebar.css'
 
 type NavItem = {
@@ -64,7 +65,14 @@ const NAV_GROUPS: NavGroup[] = [
   },
 ]
 
+const ROL_LABEL: Record<string, string> = {
+  admin: 'Administrador',
+  coordinador: 'Coordinador',
+  empleado: 'Empleado',
+}
+
 export default function Sidebar() {
+  const { rol } = useAuth()
   return (
     <aside className="sb">
       <div className="sb-brand">
@@ -77,7 +85,7 @@ export default function Sidebar() {
 
       <div className="sb-role">
         <span className="sb-role-dot" />
-        Administrador
+        {rol ? ROL_LABEL[rol] ?? rol : '...'}
       </div>
 
       <nav className="sb-nav">

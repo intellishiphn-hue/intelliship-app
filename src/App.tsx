@@ -1,35 +1,50 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { AuthProvider } from './contexts/AuthContext'
+import RutaProtegida from './components/auth/RutaProtegida'
 import Sidebar from './components/layout/Sidebar'
 import Topbar from './components/layout/Topbar'
 import Dashboard from './pages/Dashboard'
 import Placeholder from './pages/Placeholder'
+import Login from './pages/Login'
+import Empleados from './pages/Empleados'
 
-export default function App() {
+function PanelLayout({ children }: { children: React.ReactNode }) {
   return (
-    <BrowserRouter>
+    <RutaProtegida>
       <div className="app-shell">
         <Sidebar />
         <div style={{ flex: 1, minWidth: 0 }}>
           <Topbar />
-          <Routes>
-            <Route path="/" element={<Dashboard />} />
-            <Route path="/buzon" element={<Placeholder title="Buzon Intelliship" />} />
-            <Route path="/guias" element={<Placeholder title="Envio de guias" />} />
-            <Route path="/guias-nacionales" element={<Placeholder title="Guias nacionales" />} />
-            <Route path="/bodega" element={<Placeholder title="Bodega" />} />
-            <Route path="/carga-china" element={<Placeholder title="Carga China" />} />
-            <Route path="/personal" element={<Placeholder title="Personal" />} />
-            <Route path="/asistencia" element={<Placeholder title="Asistencia" />} />
-            <Route path="/vacaciones" element={<Placeholder title="Permisos y vacaciones" />} />
-            <Route path="/documentos" element={<Placeholder title="Documentos" />} />
-            <Route path="/nomina" element={<Placeholder title="Nomina / Planilla" />} />
-            <Route path="/pagos" element={<Placeholder title="Pagos" />} />
-            <Route path="/reportes" element={<Placeholder title="Reportes" />} />
-            <Route path="/administracion" element={<Placeholder title="Administracion" />} />
-            <Route path="/configuracion" element={<Placeholder title="Configuracion" />} />
-          </Routes>
+          {children}
         </div>
       </div>
-    </BrowserRouter>
+    </RutaProtegida>
+  )
+}
+
+export default function App() {
+  return (
+    <AuthProvider>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route path="/" element={<PanelLayout><Dashboard /></PanelLayout>} />
+          <Route path="/buzon" element={<PanelLayout><Placeholder title="Buzon Intelliship" /></PanelLayout>} />
+          <Route path="/guias" element={<PanelLayout><Placeholder title="Envio de guias" /></PanelLayout>} />
+          <Route path="/guias-nacionales" element={<PanelLayout><Placeholder title="Guias nacionales" /></PanelLayout>} />
+          <Route path="/bodega" element={<PanelLayout><Placeholder title="Bodega" /></PanelLayout>} />
+          <Route path="/carga-china" element={<PanelLayout><Placeholder title="Carga China" /></PanelLayout>} />
+          <Route path="/personal" element={<PanelLayout><Empleados /></PanelLayout>} />
+          <Route path="/asistencia" element={<PanelLayout><Placeholder title="Asistencia" /></PanelLayout>} />
+          <Route path="/vacaciones" element={<PanelLayout><Placeholder title="Permisos y vacaciones" /></PanelLayout>} />
+          <Route path="/documentos" element={<PanelLayout><Placeholder title="Documentos" /></PanelLayout>} />
+          <Route path="/nomina" element={<PanelLayout><Placeholder title="Nomina / Planilla" /></PanelLayout>} />
+          <Route path="/pagos" element={<PanelLayout><Placeholder title="Pagos" /></PanelLayout>} />
+          <Route path="/reportes" element={<PanelLayout><Placeholder title="Reportes" /></PanelLayout>} />
+          <Route path="/administracion" element={<PanelLayout><Placeholder title="Administracion" /></PanelLayout>} />
+          <Route path="/configuracion" element={<PanelLayout><Placeholder title="Configuracion" /></PanelLayout>} />
+        </Routes>
+      </BrowserRouter>
+    </AuthProvider>
   )
 }
