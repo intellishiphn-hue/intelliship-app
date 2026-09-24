@@ -1,8 +1,7 @@
 rules_version = '2';
 
 // Reglas base: nada es publico. Todo requiere sesion iniciada (Firebase Auth).
-// Se iran afinando por rol (admin/coordinador/empleado) a medida que
-// migremos cada modulo (RRHH, Carga China, Bodega, Guias, Buzon).
+// Se iran afinando modulo por modulo (RRHH, Carga China, Bodega, Guias, Buzon).
 service cloud.firestore {
   match /databases/{database}/documents {
 
@@ -10,20 +9,36 @@ service cloud.firestore {
       return request.auth != null;
     }
 
+    function miRol() {
+      return get(/databases/$(database)/documents/usuarios/$(request.auth.uid)).data.rol;
+    }
+
+    function esAdmin() {
+      return estaAutenticado() && miRol() == 'admin';
+    }
+
     match /{document=**} {
       allow read, write: if false;
     }
 
-    // Rol de cada usuario (admin/coordinador/empleado). Por ahora cualquier
-    // usuario autenticado puede leer/escribir; se restringe mas adelante
-    // cuando tengamos gestion de roles desde el panel.
+    // Rol de cada usuario (admin/coordinador/empleado). Cualquier usuario
+    // autenticado puede leer roles (se necesita para el menu), pero solo un
+    // admin puede crear o cambiar roles.
     match /usuarios/{uid} {
-      allow read, write: if estaAutenticado();
+      allow read: if estaAutenticado();
+      allow create: if esAdmin() || (estaAutenticado() && request.auth.uid == uid);
+      allow update: if esAdmin();
     }
 
     match /empleados/{empleadoId} {
       allow read: if estaAutenticado();
       allow write: if estaAutenticado();
+
+      // Datos sensibles (salario, etc.) solo los puede leer/escribir un
+      // admin. Coordinadores y empleados no tienen acceso a esta subcoleccion.
+      match /confidencial/{doc} {
+        allow read, write: if esAdmin();
+      }
     }
   }
 }

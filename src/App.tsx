@@ -7,6 +7,7 @@ import Dashboard from './pages/Dashboard'
 import Placeholder from './pages/Placeholder'
 import Login from './pages/Login'
 import Empleados from './pages/Empleados'
+import Usuarios from './pages/Usuarios'
 
 function PanelLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -42,6 +43,7 @@ export default function App() {
           <Route path="/pagos" element={<PanelLayout><Placeholder title="Pagos" /></PanelLayout>} />
           <Route path="/reportes" element={<PanelLayout><Placeholder title="Reportes" /></PanelLayout>} />
           <Route path="/administracion" element={<PanelLayout><Placeholder title="Administracion" /></PanelLayout>} />
+          <Route path="/usuarios" element={<PanelLayout><Usuarios /></PanelLayout>} />
           <Route path="/configuracion" element={<PanelLayout><Placeholder title="Configuracion" /></PanelLayout>} />
         </Routes>
       </BrowserRouter>

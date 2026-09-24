@@ -8,8 +8,10 @@ import {
   orderBy,
   query,
   serverTimestamp,
+  setDoc,
 } from 'firebase/firestore'
 import { db } from '../lib/firebase'
+import { useAuth } from '../contexts/AuthContext'
 import './Empleados.css'
 
 type Empleado = {
@@ -24,7 +26,40 @@ type Empleado = {
 
 const VACIO = { nombre: '', puesto: '', correo: '', telefono: '', fechaIngreso: '' }
 
+function CeldaSalario({ empleadoId }: { empleadoId: string }) {
+  const [salario, setSalario] = useState('')
+  const [cargado, setCargado] = useState(false)
+
+  useEffect(() => {
+    const ref = doc(db, 'empleados', empleadoId, 'confidencial', 'datos')
+    const unsub = onSnapshot(ref, (snap) => {
+      setSalario(snap.exists() ? String(snap.data().salarioBase ?? '') : '')
+      setCargado(true)
+    })
+    return unsub
+  }, [empleadoId])
+
+  async function guardar() {
+    const ref = doc(db, 'empleados', empleadoId, 'confidencial', 'datos')
+    await setDoc(ref, { salarioBase: Number(salario) || 0 }, { merge: true })
+  }
+
+  if (!cargado) return null
+
+  return (
+    <input
+      className="emp-salario-input"
+      type="number"
+      value={salario}
+      placeholder="L 0.00"
+      onChange={(e) => setSalario(e.target.value)}
+      onBlur={guardar}
+    />
+  )
+}
+
 export default function Empleados() {
+  const { rol } = useAuth()
   const [empleados, setEmpleados] = useState<Empleado[]>([])
   const [cargando, setCargando] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -78,6 +113,8 @@ export default function Empleados() {
       setError('No se pudo eliminar el empleado.')
     }
   }
+
+  const esAdmin = rol === 'admin'
 
   return (
     <div className="emp-page">
@@ -159,6 +196,7 @@ export default function Empleados() {
                 <th>Correo</th>
                 <th>Telefono</th>
                 <th>Ingreso</th>
+                {esAdmin && <th>Salario base</th>}
                 <th></th>
               </tr>
             </thead>
@@ -170,6 +208,11 @@ export default function Empleados() {
                   <td>{emp.correo || '—'}</td>
                   <td>{emp.telefono || '—'}</td>
                   <td>{emp.fechaIngreso || '—'}</td>
+                  {esAdmin && (
+                    <td>
+                      <CeldaSalario empleadoId={emp.id} />
+                    </td>
+                  )}
                   <td>
                     <button className="emp-del" onClick={() => eliminarEmpleado(emp.id)} title="Eliminar">
                       ✕
