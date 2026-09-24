@@ -1,0 +1,38 @@
+:root {
+  /* Sidebar (oscuro, igual espiritu que RAPIFIX) */
+  --sb-bg: #0b1120;
+  --sb-bg-hover: #161f34;
+  --sb-text: #9aa5b8;
+  --sb-text-active: #ffffff;
+  --sb-section-label: #55617a;
+  --sb-border: #1c2436;
+  --sb-accent: #2f6bff;
+  --sb-accent-soft: rgba(47, 107, 255, 0.18);
+
+  /* Contenido */
+  --bg: #f3f5f9;
+  --surface: #ffffff;
+  --surface-border: #e4e8f0;
+  --text: #0f172a;
+  --text-secondary: #64748b;
+  --text-tertiary: #94a3b8;
+
+  /* Acentos funcionales */
+  --accent: #2f6bff;
+  --accent-soft: #eaf0ff;
+  --green: #16a34a;
+  --green-soft: #e8f7ee;
+  --orange: #d97706;
+  --orange-soft: #fef3e2;
+  --red: #dc2626;
+  --red-soft: #fdeaea;
+  --purple: #7c3aed;
+  --purple-soft: #f2ebfe;
+
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --shadow-card: 0 1px 2px rgba(15, 23, 42, 0.04), 0 1px 8px rgba(15, 23, 42, 0.04);
+
+  --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
