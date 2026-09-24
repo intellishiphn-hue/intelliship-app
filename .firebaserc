@@ -1,6 +1,6 @@
 {
   "projects": {
-    "default": "PENDIENTE-crear-proyecto",
-    "prod": "PENDIENTE-crear-proyecto"
+    "default": "intelliship-prod",
+    "prod": "intelliship-prod"
   }
 }
