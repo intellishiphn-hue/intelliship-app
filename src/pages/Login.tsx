@@ -1,13 +1,19 @@
 import { useState, type FormEvent } from 'react'
+import { Navigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import './Login.css'
 
 export default function Login() {
-  const { login } = useAuth()
+  const { login, user, cargando: cargandoSesion } = useAuth()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [cargando, setCargando] = useState(false)
+
+  // Si ya hay una sesion activa (login exitoso o sesion previa), manda al panel.
+  if (!cargandoSesion && user) {
+    return <Navigate to="/" replace />
+  }
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault()
