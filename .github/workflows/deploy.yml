@@ -1,0 +1,42 @@
+name: Deploy
+
+# Publica el panel, reglas e indices a Firebase cada vez que se sube
+# codigo a main. Requiere el secreto FIREBASE_SERVICE_ACCOUNT_INTELLISHIP
+# en GitHub (Settings -> Secrets and variables -> Actions).
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+env:
+  FIREBASE_PROJECT: PENDIENTE-crear-proyecto
+
+jobs:
+  deploy:
+    name: Compilar y publicar
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Instalar dependencias
+        run: npm ci
+      - name: Build del panel
+        run: npm run build
+      - name: Publicar en Firebase Hosting, Firestore y Storage
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: '${{ secrets.GITHUB_TOKEN }}'
+          firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_INTELLISHIP }}'
+          projectId: ${{ env.FIREBASE_PROJECT }}
+          channelId: live

@@ -1,0 +1,15 @@
+rules_version = '2';
+
+// Igual que Firestore: nada publico, todo requiere sesion iniciada.
+// Se afina por carpeta (documentos de empleados, comprobantes, etc.) por modulo.
+service firebase.storage {
+  match /b/{bucket}/o {
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+
+    match /documentos/{empleadoId}/{archivo} {
+      allow read, write: if request.auth != null;
+    }
+  }
+}
