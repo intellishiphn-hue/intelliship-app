@@ -1,8 +1,9 @@
 name: Deploy
 
-# Publica el panel, reglas e indices a Firebase cada vez que se sube
-# codigo a main. Requiere el secreto FIREBASE_SERVICE_ACCOUNT_INTELLISHIP
-# en GitHub (Settings -> Secrets and variables -> Actions).
+# Publica el panel, reglas de Firestore/Storage e indices a Firebase cada
+# vez que se sube codigo a main. Requiere el secreto
+# FIREBASE_SERVICE_ACCOUNT_INTELLISHIP en GitHub (Settings -> Secrets and
+# variables -> Actions), con el JSON de la cuenta de servicio de Firebase.
 on:
   push:
     branches: [main]
@@ -33,10 +34,11 @@ jobs:
         run: npm ci
       - name: Build del panel
         run: npm run build
-      - name: Publicar en Firebase Hosting, Firestore y Storage
-        uses: FirebaseExtended/action-hosting-deploy@v0
-        with:
-          repoToken: '${{ secrets.GITHUB_TOKEN }}'
-          firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_INTELLISHIP }}'
-          projectId: ${{ env.FIREBASE_PROJECT }}
-          channelId: live
+      - name: Publicar en Firebase (Hosting, Firestore, Storage)
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS_JSON: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_INTELLISHIP }}
+        run: |
+          echo "$GOOGLE_APPLICATION_CREDENTIALS_JSON" > /tmp/firebase-sa.json
+          export GOOGLE_APPLICATION_CREDENTIALS=/tmp/firebase-sa.json
+          npx firebase-tools@15 deploy --only hosting,firestore,storage --project "$FIREBASE_PROJECT" --non-interactive
+          rm -f /tmp/firebase-sa.json
