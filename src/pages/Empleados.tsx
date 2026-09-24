@@ -17,44 +17,85 @@ import './Empleados.css'
 type Empleado = {
   id: string
   nombre: string
+  apodo: string
   puesto: string
+  departamento: string
   correo: string
   telefono: string
+  direccion: string
+  estadoCivil: string
+  genero: string
+  fechaNacimiento: string
   fechaIngreso: string
+  contactoEmergencia: string
   activo: boolean
 }
 
-const VACIO = { nombre: '', puesto: '', correo: '', telefono: '', fechaIngreso: '' }
+const VACIO = {
+  nombre: '',
+  apodo: '',
+  puesto: '',
+  departamento: '',
+  correo: '',
+  telefono: '',
+  direccion: '',
+  estadoCivil: '',
+  genero: '',
+  fechaNacimiento: '',
+  fechaIngreso: '',
+  contactoEmergencia: '',
+}
 
-function CeldaSalario({ empleadoId }: { empleadoId: string }) {
+function CeldaConfidencial({ empleadoId }: { empleadoId: string }) {
   const [salario, setSalario] = useState('')
+  const [cedula, setCedula] = useState('')
   const [cargado, setCargado] = useState(false)
 
   useEffect(() => {
     const ref = doc(db, 'empleados', empleadoId, 'confidencial', 'datos')
     const unsub = onSnapshot(ref, (snap) => {
-      setSalario(snap.exists() ? String(snap.data().salarioBase ?? '') : '')
+      const data = snap.data()
+      setSalario(snap.exists() ? String(data?.salarioBase ?? '') : '')
+      setCedula(snap.exists() ? String(data?.cedula ?? '') : '')
       setCargado(true)
     })
     return unsub
   }, [empleadoId])
 
-  async function guardar() {
+  async function guardarSalario() {
     const ref = doc(db, 'empleados', empleadoId, 'confidencial', 'datos')
     await setDoc(ref, { salarioBase: Number(salario) || 0 }, { merge: true })
+  }
+
+  async function guardarCedula() {
+    const ref = doc(db, 'empleados', empleadoId, 'confidencial', 'datos')
+    await setDoc(ref, { cedula }, { merge: true })
   }
 
   if (!cargado) return null
 
   return (
-    <input
-      className="emp-salario-input"
-      type="number"
-      value={salario}
-      placeholder="L 0.00"
-      onChange={(e) => setSalario(e.target.value)}
-      onBlur={guardar}
-    />
+    <>
+      <td>
+        <input
+          className="emp-salario-input"
+          value={cedula}
+          placeholder="Cedula"
+          onChange={(e) => setCedula(e.target.value)}
+          onBlur={guardarCedula}
+        />
+      </td>
+      <td>
+        <input
+          className="emp-salario-input"
+          type="number"
+          value={salario}
+          placeholder="L 0.00"
+          onChange={(e) => setSalario(e.target.value)}
+          onBlur={guardarSalario}
+        />
+      </td>
+    </>
   )
 }
 
@@ -66,6 +107,7 @@ export default function Empleados() {
   const [mostrarForm, setMostrarForm] = useState(false)
   const [form, setForm] = useState(VACIO)
   const [guardando, setGuardando] = useState(false)
+  const [expandido, setExpandido] = useState<string | null>(null)
 
   useEffect(() => {
     const q = query(collection(db, 'empleados'), orderBy('nombre'))
@@ -115,6 +157,79 @@ export default function Empleados() {
   }
 
   const esAdmin = rol === 'admin'
+  const activos = empleados.filter((e) => e.activo !== false)
+  const inactivos = empleados.filter((e) => e.activo === false)
+
+  function filaDetalle(emp: Empleado) {
+    if (expandido !== emp.id) return null
+    const cols = 6 + (esAdmin ? 2 : 0) + 1
+    return (
+      <tr className="emp-detalle-row" key={emp.id + '-detalle'}>
+        <td colSpan={cols}>
+          <div className="emp-detalle-grid">
+            {emp.apodo && <div><strong>Apodo:</strong> {emp.apodo}</div>}
+            {emp.direccion && <div><strong>Direccion:</strong> {emp.direccion}</div>}
+            {emp.estadoCivil && <div><strong>Estado civil:</strong> {emp.estadoCivil}</div>}
+            {emp.genero && <div><strong>Genero:</strong> {emp.genero}</div>}
+            {emp.fechaNacimiento && <div><strong>Nacimiento:</strong> {emp.fechaNacimiento}</div>}
+            {emp.contactoEmergencia && <div><strong>Contacto de emergencia:</strong> {emp.contactoEmergencia}</div>}
+            {emp.activo === false && <div className="emp-inactivo-tag">Inactivo</div>}
+          </div>
+        </td>
+      </tr>
+    )
+  }
+
+  function tabla(lista: Empleado[]) {
+    return (
+      <table className="emp-table">
+        <thead>
+          <tr>
+            <th></th>
+            <th>Nombre</th>
+            <th>Puesto</th>
+            <th>Departamento</th>
+            <th>Correo</th>
+            <th>Telefono</th>
+            <th>Ingreso</th>
+            {esAdmin && <th>Cedula</th>}
+            {esAdmin && <th>Salario base</th>}
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {lista.map((emp) => (
+            <>
+              <tr key={emp.id}>
+                <td>
+                  <button
+                    className="emp-expand-btn"
+                    onClick={() => setExpandido(expandido === emp.id ? null : emp.id)}
+                    title="Ver mas"
+                  >
+                    {expandido === emp.id ? '▾' : '▸'}
+                  </button>
+                </td>
+                <td className="emp-nombre">{emp.nombre}</td>
+                <td>{emp.puesto || '—'}</td>
+                <td>{emp.departamento || '—'}</td>
+                <td>{emp.correo || '—'}</td>
+                <td>{emp.telefono || '—'}</td>
+                <td>{emp.fechaIngreso || '—'}</td>
+                {esAdmin && <CeldaConfidencial empleadoId={emp.id} />}
+                <td>
+                  <button className="emp-del" onClick={() => eliminarEmpleado(emp.id)} title="Eliminar">
+                    ✕
+                  </button>
+                </td>
+              </tr>
+              {filaDetalle(emp)}
+            </>
+          ))}
+        </tbody>
+      </table>
+    )
+  }
 
   return (
     <div className="emp-page">
@@ -143,10 +258,24 @@ export default function Empleados() {
               />
             </div>
             <div>
+              <label>Apodo / nombre usual</label>
+              <input
+                value={form.apodo}
+                onChange={(e) => setForm({ ...form, apodo: e.target.value })}
+              />
+            </div>
+            <div>
               <label>Puesto</label>
               <input
                 value={form.puesto}
                 onChange={(e) => setForm({ ...form, puesto: e.target.value })}
+              />
+            </div>
+            <div>
+              <label>Departamento</label>
+              <input
+                value={form.departamento}
+                onChange={(e) => setForm({ ...form, departamento: e.target.value })}
               />
             </div>
             <div>
@@ -165,11 +294,47 @@ export default function Empleados() {
               />
             </div>
             <div>
+              <label>Direccion</label>
+              <input
+                value={form.direccion}
+                onChange={(e) => setForm({ ...form, direccion: e.target.value })}
+              />
+            </div>
+            <div>
+              <label>Estado civil</label>
+              <input
+                value={form.estadoCivil}
+                onChange={(e) => setForm({ ...form, estadoCivil: e.target.value })}
+              />
+            </div>
+            <div>
+              <label>Genero</label>
+              <input
+                value={form.genero}
+                onChange={(e) => setForm({ ...form, genero: e.target.value })}
+              />
+            </div>
+            <div>
+              <label>Fecha de nacimiento</label>
+              <input
+                type="date"
+                value={form.fechaNacimiento}
+                onChange={(e) => setForm({ ...form, fechaNacimiento: e.target.value })}
+              />
+            </div>
+            <div>
               <label>Fecha de ingreso</label>
               <input
                 type="date"
                 value={form.fechaIngreso}
                 onChange={(e) => setForm({ ...form, fechaIngreso: e.target.value })}
+              />
+            </div>
+            <div>
+              <label>Contacto de emergencia</label>
+              <input
+                value={form.contactoEmergencia}
+                onChange={(e) => setForm({ ...form, contactoEmergencia: e.target.value })}
               />
             </div>
           </div>
@@ -188,40 +353,15 @@ export default function Empleados() {
             <div>Todavia no hay empleados registrados</div>
           </div>
         ) : (
-          <table className="emp-table">
-            <thead>
-              <tr>
-                <th>Nombre</th>
-                <th>Puesto</th>
-                <th>Correo</th>
-                <th>Telefono</th>
-                <th>Ingreso</th>
-                {esAdmin && <th>Salario base</th>}
-                <th></th>
-              </tr>
-            </thead>
-            <tbody>
-              {empleados.map((emp) => (
-                <tr key={emp.id}>
-                  <td className="emp-nombre">{emp.nombre}</td>
-                  <td>{emp.puesto || '—'}</td>
-                  <td>{emp.correo || '—'}</td>
-                  <td>{emp.telefono || '—'}</td>
-                  <td>{emp.fechaIngreso || '—'}</td>
-                  {esAdmin && (
-                    <td>
-                      <CeldaSalario empleadoId={emp.id} />
-                    </td>
-                  )}
-                  <td>
-                    <button className="emp-del" onClick={() => eliminarEmpleado(emp.id)} title="Eliminar">
-                      ✕
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          <>
+            {tabla(activos)}
+            {inactivos.length > 0 && (
+              <div className="emp-inactivos-section">
+                <div className="emp-inactivos-label">Inactivos ({inactivos.length})</div>
+                {tabla(inactivos)}
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>
