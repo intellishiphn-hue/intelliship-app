@@ -40,5 +40,20 @@ service cloud.firestore {
         allow read, write: if esAdmin();
       }
     }
+
+    // Vacaciones / permisos / faltas. Las registra directamente el admin
+    // (no hay flujo de aprobacion); cualquier usuario autenticado puede
+    // leerlas (mas adelante, cuando exista login de empleado, se limitara
+    // a que cada quien vea solo lo suyo).
+    match /vacaciones/{registroId} {
+      allow read: if estaAutenticado();
+      allow write: if esAdmin();
+    }
+
+    // Pagos de nomina (quincenales). Mismo criterio que vacaciones.
+    match /pagos/{pagoId} {
+      allow read: if estaAutenticado();
+      allow write: if esAdmin();
+    }
   }
 }
