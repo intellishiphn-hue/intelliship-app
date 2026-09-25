@@ -10,6 +10,7 @@ import Empleados from './pages/Empleados'
 import Usuarios from './pages/Usuarios'
 import Vacaciones from './pages/Vacaciones'
 import Pagos from './pages/Pagos'
+import Asistencia from './pages/Asistencia'
 
 function PanelLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -38,7 +39,7 @@ export default function App() {
           <Route path="/bodega" element={<PanelLayout><Placeholder title="Bodega" /></PanelLayout>} />
           <Route path="/carga-china" element={<PanelLayout><Placeholder title="Carga China" /></PanelLayout>} />
           <Route path="/personal" element={<PanelLayout><Empleados /></PanelLayout>} />
-          <Route path="/asistencia" element={<PanelLayout><Placeholder title="Asistencia" /></PanelLayout>} />
+          <Route path="/asistencia" element={<PanelLayout><Asistencia /></PanelLayout>} />
           <Route path="/vacaciones" element={<PanelLayout><Vacaciones /></PanelLayout>} />
           <Route path="/documentos" element={<PanelLayout><Placeholder title="Documentos" /></PanelLayout>} />
           <Route path="/nomina" element={<PanelLayout><Pagos /></PanelLayout>} />

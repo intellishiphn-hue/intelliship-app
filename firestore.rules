@@ -55,5 +55,14 @@ service cloud.firestore {
       allow read: if estaAutenticado();
       allow write: if esAdmin();
     }
+
+    // Marcaciones de asistencia (entrada/salida). Cualquier usuario
+    // autenticado puede crear las suyas (reloj marcador de autoservicio);
+    // solo un admin puede editarlas o borrarlas.
+    match /asistencia/{marcaId} {
+      allow read: if estaAutenticado();
+      allow create: if estaAutenticado();
+      allow update, delete: if esAdmin();
+    }
   }
 }
