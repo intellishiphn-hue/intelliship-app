@@ -43,6 +43,7 @@ const WHATSAPP_TOKEN = defineSecret('WHATSAPP_TOKEN')
 const WHATSAPP_PHONE_NUMBER_ID = defineSecret('WHATSAPP_PHONE_NUMBER_ID')
 const WHATSAPP_TEMPLATE_PAGO = defineSecret('WHATSAPP_TEMPLATE_PAGO')
 const WHATSAPP_TEMPLATE_ESTADO = defineSecret('WHATSAPP_TEMPLATE_ESTADO')
+const WHATSAPP_TEMPLATE_GUIA = defineSecret('WHATSAPP_TEMPLATE_GUIA')
 
 const IDIOMA_PLANTILLA = 'es'
 
@@ -57,6 +58,24 @@ function normalizarTelefonoHN(telefono) {
   // Numero con otro formato (ya trae codigo de pais distinto, o esta mal
   // capturado) -- se manda tal cual y que la API de Meta decida.
   return soloDigitos
+}
+
+// Cada courier tiene su propio formato de link de rastreo. El "aid" de
+// Cargo Expreso es fijo para la cuenta de INTELLISHIP (se confirmo en los
+// 981 envios historicos que todos lo comparten). Si Cargo Expreso cambia
+// ese id algun dia, se actualiza aqui.
+const CARGO_EXPRESO_AID = '3d0aea44-9cb5-424a-9b80-3b44b7a62b29'
+
+function construirLinkRastreo(empresa, guia) {
+  const empresaNorm = String(empresa || '').toUpperCase()
+  if (empresaNorm.includes('FORZA')) {
+    // Forza usa el numero de guia SIN el sufijo "-N" que se le agrega en
+    // el sistema (ej. "FD40707137-1" -> "FD40707137").
+    const base = String(guia || '').split('-')[0]
+    return `https://rastreo.forzadelivery.com/${base}`
+  }
+  // Por defecto, Cargo Expreso (el courier mas usado).
+  return `https://tracking.caexlogistics.com/componentes/siscaexhn/Tracking?aid=${CARGO_EXPRESO_AID}&ordno=${guia}`
 }
 
 function formatearLempiras(monto) {
@@ -245,6 +264,42 @@ exports.notificarRecibidoChina = onDocumentCreated(
       telefono: cliente.telefono || null,
       destinatario: cliente.nombre || null,
       estadoNuevo: recibo.estado,
+      ...resultado,
+    })
+  }
+)
+
+
+// Se dispara cuando se crea una guia nueva en Envio de guias
+// (cargoExpreso/{id}) -- ya sea desde el formulario manual, o desde la
+// carga masiva de PDF que arma este mismo registro. Plantilla esperada
+// (WHATSAPP_TEMPLATE_GUIA, por defecto "envio_confirmado") con 3
+// variables de cuerpo en este orden: {{1}} nombre del cliente, {{2}}
+// numero de guia, {{3}} link de rastreo (se arma solo segun la empresa --
+// Cargo Expreso o Forza).
+exports.notificarEnvioGuia = onDocumentCreated(
+  { document: 'cargoExpreso/{envioId}', secrets: [WHATSAPP_TOKEN, WHATSAPP_PHONE_NUMBER_ID, WHATSAPP_TEMPLATE_GUIA] },
+  async (event) => {
+    const envio = event.data?.data()
+    if (!envio?.guia) return
+
+    const link = envio.link || construirLinkRastreo(envio.empresa, envio.guia)
+    if (!envio.link) {
+      await event.data.ref.update({ link }).catch(() => {})
+    }
+
+    const resultado = await enviarPlantillaWhatsapp({
+      telefono: envio.telefono,
+      plantilla: WHATSAPP_TEMPLATE_GUIA.value() || 'envio_confirmado',
+      parametros: [envio.nombre || 'cliente', envio.guia, link],
+    })
+
+    await registrarLog({
+      tipo: 'envio_guia',
+      envioId: event.params.envioId,
+      telefono: envio.telefono || null,
+      destinatario: envio.nombre || null,
+      guia: envio.guia,
       ...resultado,
     })
   }
