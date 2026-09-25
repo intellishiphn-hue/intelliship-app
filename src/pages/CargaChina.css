@@ -314,3 +314,24 @@
     grid-template-columns: 1fr;
   }
 }
+
+.cc-form-peso {
+  display: flex;
+  gap: 6px;
+}
+.cc-form-peso input {
+  flex: 1;
+}
+.cc-form-peso select {
+  width: 70px;
+}
+
+.cc-adjuntos {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 0.85em;
+}
+.cc-adjuntos a {
+  color: var(--color-accent, #2dd6e0);
+}

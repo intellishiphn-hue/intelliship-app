@@ -1,0 +1,43 @@
+.ih-page {
+  padding: 24px;
+  max-width: 900px;
+}
+
+.ih-page h1 {
+  margin-bottom: 8px;
+}
+
+.ih-nota {
+  color: var(--color-texto-suave, #666);
+  font-size: 0.9em;
+  margin-bottom: 16px;
+}
+
+.ih-card {
+  border: 1px solid var(--color-borde, #e2e2e2);
+  border-radius: 10px;
+  padding: 16px;
+  margin-bottom: 16px;
+  background: var(--color-superficie, #fff);
+}
+
+.ih-card h3 {
+  margin-top: 0;
+}
+
+.ih-card input[type='file'] {
+  display: block;
+  margin: 10px 0;
+}
+
+.ih-log {
+  margin-top: 12px;
+  padding: 10px;
+  background: #111;
+  color: #0f0;
+  font-size: 0.8em;
+  max-height: 240px;
+  overflow-y: auto;
+  border-radius: 6px;
+  white-space: pre-wrap;
+}

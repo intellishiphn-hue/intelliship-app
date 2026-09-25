@@ -10,7 +10,8 @@ import {
   updateDoc,
   writeBatch,
 } from 'firebase/firestore'
-import { db } from '../lib/firebase'
+import { getDownloadURL, ref, uploadBytes } from 'firebase/storage'
+import { db, storage } from '../lib/firebase'
 import { useAuth } from '../contexts/AuthContext'
 import './CargaChina.css'
 
@@ -26,7 +27,15 @@ export const ESTADOS_CHINA = [
   'Entregado al cliente',
 ]
 
-type Cliente = { id: string; casillero: string; nombre: string; telefono: string; email: string }
+type Cliente = {
+  id: string
+  casillero: string
+  nombre: string
+  telefono: string
+  email: string
+  etiquetaUrl?: string
+  etiquetaNombreArchivo?: string
+}
 
 type HistorialItem = { estado: string; fecha: string }
 
@@ -45,6 +54,16 @@ type Recibo = {
   contenido: string
   cbm: string
   estado: string
+  numeroWR?: string
+  peso?: string
+  pesoUnidad?: string
+  medidas?: string
+  facturaUrl?: string
+  facturaNombreArchivo?: string
+  packingUrl?: string
+  packingNombreArchivo?: string
+  fotoUrl?: string
+  fotoNombreArchivo?: string
 }
 
 const hoy = () => new Date().toISOString().slice(0, 10)
@@ -163,6 +182,7 @@ function TabClientes({
   const [guardando, setGuardando] = useState(false)
   const siguienteCasillero = `INTELL ${clientes.length + 1}`
   const [form, setForm] = useState({ casillero: siguienteCasillero, nombre: '', telefono: '', email: '' })
+  const [etiqueta, setEtiqueta] = useState<File | null>(null)
 
   function abrirForm() {
     if (!mostrarForm) setForm((f) => ({ ...f, casillero: f.nombre ? f.casillero : siguienteCasillero }))
@@ -174,8 +194,16 @@ function TabClientes({
     if (!form.nombre || !form.casillero) return
     setGuardando(true)
     try {
-      await addDoc(collection(db, 'chinaClientes'), { ...form })
+      const docRef = await addDoc(collection(db, 'chinaClientes'), { ...form })
+      if (etiqueta) {
+        const path = `china/clientes/${docRef.id}/${Date.now()}_${etiqueta.name}`
+        const storageRef = ref(storage, path)
+        await uploadBytes(storageRef, etiqueta, { contentType: etiqueta.type || 'application/octet-stream' })
+        const url = await getDownloadURL(storageRef)
+        await updateDoc(doc(db, 'chinaClientes', docRef.id), { etiquetaUrl: url, etiquetaNombreArchivo: etiqueta.name })
+      }
       setForm({ casillero: `INTELL ${clientes.length + 2}`, nombre: '', telefono: '', email: '' })
+      setEtiqueta(null)
       setMostrarForm(false)
     } catch (err) {
       console.error(err)
@@ -223,6 +251,10 @@ function TabClientes({
               <label>Email</label>
               <input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
             </div>
+            <div>
+              <label>Etiqueta (PDF, opcional)</label>
+              <input type="file" accept="application/pdf,image/*" onChange={(e) => setEtiqueta(e.target.files?.[0] || null)} />
+            </div>
           </div>
           <button className="btn-primary" type="submit" disabled={guardando}>
             {guardando ? 'Guardando...' : 'Guardar cliente'}
@@ -244,6 +276,7 @@ function TabClientes({
                 <th>Nombre</th>
                 <th>Telefono</th>
                 <th>Email</th>
+                <th>Etiqueta</th>
                 <th></th>
               </tr>
             </thead>
@@ -254,6 +287,15 @@ function TabClientes({
                   <td className="cc-nombre">{c.nombre}</td>
                   <td>{c.telefono || '—'}</td>
                   <td>{c.email || '—'}</td>
+                  <td>
+                    {c.etiquetaUrl ? (
+                      <a href={c.etiquetaUrl} target="_blank" rel="noreferrer">
+                        Ver
+                      </a>
+                    ) : (
+                      '—'
+                    )}
+                  </td>
                   <td>
                     {esAdmin && (
                       <button className="cc-del" onClick={() => eliminar(c.id)} title="Eliminar">
@@ -458,7 +500,27 @@ function TabRecibos({
 }) {
   const [mostrarForm, setMostrarForm] = useState(false)
   const [guardando, setGuardando] = useState(false)
-  const [form, setForm] = useState({ clienteId: '', contenedorId: '', contenido: '', cbm: '' })
+  const [form, setForm] = useState({
+    clienteId: '',
+    contenedorId: '',
+    contenido: '',
+    cbm: '',
+    numeroWR: '',
+    peso: '',
+    pesoUnidad: 'kg',
+    medidas: '',
+  })
+  const [factura, setFactura] = useState<File | null>(null)
+  const [packing, setPacking] = useState<File | null>(null)
+  const [foto, setFoto] = useState<File | null>(null)
+
+  async function subirArchivo(reciboId: string, carpeta: string, archivo: File) {
+    const path = `china/recibos/${reciboId}/${carpeta}_${Date.now()}_${archivo.name}`
+    const storageRef = ref(storage, path)
+    await uploadBytes(storageRef, archivo, { contentType: archivo.type || 'application/octet-stream' })
+    const url = await getDownloadURL(storageRef)
+    return url
+  }
 
   async function guardar(e: FormEvent) {
     e.preventDefault()
@@ -468,8 +530,27 @@ function TabRecibos({
       const estadoInicial = form.contenedorId
         ? contenedorPorId[form.contenedorId]?.estado || ESTADOS_CHINA[0]
         : ESTADOS_CHINA[0]
-      await addDoc(collection(db, 'chinaRecibos'), { ...form, estado: estadoInicial })
-      setForm({ clienteId: '', contenedorId: '', contenido: '', cbm: '' })
+      const docRef = await addDoc(collection(db, 'chinaRecibos'), { ...form, estado: estadoInicial })
+      const extra: Record<string, string> = {}
+      if (factura) {
+        extra.facturaUrl = await subirArchivo(docRef.id, 'factura', factura)
+        extra.facturaNombreArchivo = factura.name
+      }
+      if (packing) {
+        extra.packingUrl = await subirArchivo(docRef.id, 'packing', packing)
+        extra.packingNombreArchivo = packing.name
+      }
+      if (foto) {
+        extra.fotoUrl = await subirArchivo(docRef.id, 'foto', foto)
+        extra.fotoNombreArchivo = foto.name
+      }
+      if (Object.keys(extra).length > 0) {
+        await updateDoc(doc(db, 'chinaRecibos', docRef.id), extra)
+      }
+      setForm({ clienteId: '', contenedorId: '', contenido: '', cbm: '', numeroWR: '', peso: '', pesoUnidad: 'kg', medidas: '' })
+      setFactura(null)
+      setPacking(null)
+      setFoto(null)
       setMostrarForm(false)
     } catch (err) {
       console.error(err)
@@ -544,8 +625,39 @@ function TabRecibos({
               <label>CBM</label>
               <input value={form.cbm} onChange={(e) => setForm({ ...form, cbm: e.target.value })} placeholder="Ej: 0.3" />
             </div>
+            <div>
+              <label>Numero WR</label>
+              <input value={form.numeroWR} onChange={(e) => setForm({ ...form, numeroWR: e.target.value })} placeholder="Ej: WR-000012" />
+            </div>
+            <div>
+              <label>Peso</label>
+              <div className="cc-form-peso">
+                <input value={form.peso} onChange={(e) => setForm({ ...form, peso: e.target.value })} placeholder="Ej: 100" />
+                <select value={form.pesoUnidad} onChange={(e) => setForm({ ...form, pesoUnidad: e.target.value })}>
+                  <option value="kg">kg</option>
+                  <option value="lb">lb</option>
+                </select>
+              </div>
+            </div>
+            <div>
+              <label>Medidas</label>
+              <input value={form.medidas} onChange={(e) => setForm({ ...form, medidas: e.target.value })} placeholder="Ej: 40x30x20 cm" />
+            </div>
           </div>
-          <p className="cc-form-nota">📎 Adjuntar factura y etiqueta en PDF se agrega en una siguiente fase.</p>
+          <div className="cc-form-grid">
+            <div>
+              <label>Factura (PDF)</label>
+              <input type="file" accept="application/pdf,image/*" onChange={(e) => setFactura(e.target.files?.[0] || null)} />
+            </div>
+            <div>
+              <label>Packing list (PDF)</label>
+              <input type="file" accept="application/pdf,image/*" onChange={(e) => setPacking(e.target.files?.[0] || null)} />
+            </div>
+            <div>
+              <label>Foto</label>
+              <input type="file" accept="image/*" onChange={(e) => setFoto(e.target.files?.[0] || null)} />
+            </div>
+          </div>
           <button className="btn-primary" type="submit" disabled={guardando}>
             {guardando ? 'Guardando...' : 'Guardar recibo'}
           </button>
@@ -567,6 +679,8 @@ function TabRecibos({
                 <th>Cliente</th>
                 <th>Contenido</th>
                 <th>CBM</th>
+                <th>WR / Peso</th>
+                <th>Adjuntos</th>
                 <th>Contenedor</th>
                 <th>Estado</th>
                 <th></th>
@@ -582,6 +696,28 @@ function TabRecibos({
                   </td>
                   <td>{r.contenido}</td>
                   <td>{r.cbm || '—'}</td>
+                  <td>
+                    {r.numeroWR || '—'}
+                    {r.peso ? ` · ${r.peso} ${r.pesoUnidad || 'kg'}` : ''}
+                  </td>
+                  <td className="cc-adjuntos">
+                    {r.facturaUrl && (
+                      <a href={r.facturaUrl} target="_blank" rel="noreferrer">
+                        Factura
+                      </a>
+                    )}
+                    {r.packingUrl && (
+                      <a href={r.packingUrl} target="_blank" rel="noreferrer">
+                        Packing
+                      </a>
+                    )}
+                    {r.fotoUrl && (
+                      <a href={r.fotoUrl} target="_blank" rel="noreferrer">
+                        Foto
+                      </a>
+                    )}
+                    {!r.facturaUrl && !r.packingUrl && !r.fotoUrl && '—'}
+                  </td>
                   <td>{r.contenedorId ? contenedorPorId[r.contenedorId]?.nombre || '—' : 'Sin asignar'}</td>
                   <td>
                     <select className="cc-recibo-estado" value={r.estado} onChange={(e) => cambiarEstado(r.id, e.target.value)}>

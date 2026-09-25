@@ -18,6 +18,7 @@ import Usuarios from './pages/Usuarios'
 import Vacaciones from './pages/Vacaciones'
 import Pagos from './pages/Pagos'
 import Asistencia from './pages/Asistencia'
+import ImportarHistorico from './pages/ImportarHistorico'
 
 function PanelLayout({ children }: { children: React.ReactNode }) {
   const [menuAbierto, setMenuAbierto] = useState(false)
@@ -56,6 +57,7 @@ export default function App() {
           <Route path="/administracion" element={<PanelLayout><Placeholder title="Administracion" /></PanelLayout>} />
           <Route path="/usuarios" element={<PanelLayout><Usuarios /></PanelLayout>} />
           <Route path="/configuracion" element={<PanelLayout><Placeholder title="Configuracion" /></PanelLayout>} />
+          <Route path="/admin/importar-historico" element={<PanelLayout><ImportarHistorico /></PanelLayout>} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>
