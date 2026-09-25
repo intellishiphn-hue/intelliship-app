@@ -222,9 +222,17 @@ export default function ImportarHistorico() {
         de tu Mac) y apreta el boton correspondiente. Se puede correr cada seccion por separado, en cualquier orden,
         pero corre Carga China en un solo archivo combinado.
       </p>
-      <SeccionSimple titulo="Bodega" coleccion="bodega" nota="Archivo: bodega_import.json" />
-      <SeccionSimple titulo="Guias Nacionales" coleccion="guiasNacionales" nota="Archivo: guiasNacionales_import.json" />
-      <SeccionSimple titulo="Envio de guias (Cargo Expreso)" coleccion="cargoExpreso" nota="Archivo: cargoExpreso_import.json" />
+      <SeccionSimple
+        titulo="Bodega"
+        coleccion="bodega"
+        nota="Archivo: bodega_import_5dias.json (ultimos 5 dias con datos, 44 de 44 registros -- el historico completo ya cabe en esa ventana)"
+      />
+      <SeccionSimple
+        titulo="Guias Nacionales"
+        coleccion="guiasNacionales"
+        nota="Archivo: guiasNacionales_import_5dias.json (ultimos 5 dias con datos: 277 de 775 registros. Si se quiere el historico completo, usar guiasNacionales_import.json)"
+      />
+      <SeccionSimple titulo="Envio de guias (Cargo Expreso)" coleccion="cargoExpreso" nota="Archivo: cargoExpreso_import.json (historico completo, 986 registros)" />
       <SeccionChina />
     </div>
   )
