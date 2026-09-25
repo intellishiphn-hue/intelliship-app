@@ -32,7 +32,12 @@ service cloud.firestore {
 
     match /empleados/{empleadoId} {
       allow read: if estaAutenticado();
-      allow write: if estaAutenticado();
+      // Cualquier autenticado puede crear/editar (dar de alta, corregir datos,
+      // marcar activo/inactivo). Borrar definitivamente el registro es solo
+      // para admin -- para "ya no trabaja aqui" se usa el campo activo:false,
+      // no delete.
+      allow create, update: if estaAutenticado();
+      allow delete: if esAdmin();
 
       // Datos sensibles (salario, etc.) solo los puede leer/escribir un
       // admin. Coordinadores y empleados no tienen acceso a esta subcoleccion.
