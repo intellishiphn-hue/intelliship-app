@@ -17,6 +17,10 @@ service cloud.firestore {
       return estaAutenticado() && miRol() == 'admin';
     }
 
+    function esCoordinadorOAdmin() {
+      return estaAutenticado() && (miRol() == 'admin' || miRol() == 'coordinador');
+    }
+
     match /{document=**} {
       allow read, write: if false;
     }
@@ -68,6 +72,45 @@ service cloud.firestore {
       allow read: if estaAutenticado();
       allow create: if estaAutenticado();
       allow update, delete: if esAdmin();
+    }
+
+    // Modulos de envios (Guias, Bodega, Carga China). Coordinador tiene el
+    // mismo acceso que admin para operar el dia a dia; empleado solo lee.
+    // Borrar definitivamente sigue siendo solo para admin.
+    match /bodega/{id} {
+      allow read: if estaAutenticado();
+      allow create, update: if esCoordinadorOAdmin();
+      allow delete: if esAdmin();
+    }
+
+    match /guiasNacionales/{id} {
+      allow read: if estaAutenticado();
+      allow create, update: if esCoordinadorOAdmin();
+      allow delete: if esAdmin();
+    }
+
+    match /cargoExpreso/{id} {
+      allow read: if estaAutenticado();
+      allow create, update: if esCoordinadorOAdmin();
+      allow delete: if esAdmin();
+    }
+
+    match /chinaClientes/{id} {
+      allow read: if estaAutenticado();
+      allow create, update: if esCoordinadorOAdmin();
+      allow delete: if esAdmin();
+    }
+
+    match /chinaContenedores/{id} {
+      allow read: if estaAutenticado();
+      allow create, update: if esCoordinadorOAdmin();
+      allow delete: if esAdmin();
+    }
+
+    match /chinaRecibos/{id} {
+      allow read: if estaAutenticado();
+      allow create, update: if esCoordinadorOAdmin();
+      allow delete: if esAdmin();
     }
   }
 }

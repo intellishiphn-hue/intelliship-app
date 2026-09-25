@@ -1,0 +1,228 @@
+.gn-page {
+  padding: 28px 32px 48px;
+  max-width: 1280px;
+}
+
+.gn-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  gap: 12px;
+}
+
+.gn-head h1 {
+  font-size: 22px;
+  font-weight: 700;
+  margin: 0 0 4px;
+  color: var(--text);
+}
+
+.gn-head p {
+  margin: 0;
+  color: var(--text-tertiary);
+  font-size: 13px;
+}
+
+.gn-head-acciones {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.gn-error {
+  background: var(--red-soft);
+  color: var(--red);
+  font-size: 13px;
+  font-weight: 600;
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  margin-bottom: 16px;
+}
+
+.gn-form {
+  background: var(--surface);
+  border: 1px solid var(--surface-border);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: var(--shadow-card);
+}
+
+.gn-form-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  margin-bottom: 14px;
+}
+
+.gn-form-direccion {
+  grid-column: span 3;
+}
+
+.gn-form label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 5px;
+}
+
+.gn-form input {
+  width: 100%;
+  border: 1px solid var(--surface-border);
+  border-radius: var(--radius-sm);
+  padding: 9px 11px;
+  font-size: 13px;
+  font-family: var(--font);
+  color: var(--text);
+  background: var(--surface);
+}
+
+.gn-form input:focus {
+  outline: 2px solid var(--accent-soft);
+  border-color: var(--accent);
+}
+
+.gn-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.gn-tab {
+  border: 1px solid var(--surface-border);
+  background: var(--surface);
+  color: var(--text-secondary);
+  font-size: 12.5px;
+  font-weight: 600;
+  padding: 8px 14px;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.gn-tab-activo {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+.gn-card {
+  background: var(--surface);
+  border: 1px solid var(--surface-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  margin-bottom: 20px;
+}
+
+.gn-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.gn-table th {
+  text-align: left;
+  padding: 12px 14px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  color: var(--text-tertiary);
+  border-bottom: 1px solid var(--surface-border);
+  text-transform: uppercase;
+}
+
+.gn-table td {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--surface-border);
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.gn-table tr:last-child td {
+  border-bottom: none;
+}
+
+.gn-nombre {
+  font-weight: 600;
+  color: var(--text);
+}
+
+.gn-direccion {
+  max-width: 240px;
+  white-space: normal;
+}
+
+.gn-tag {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 9px;
+  border-radius: 999px;
+}
+
+.gn-tag-pendiente {
+  background: var(--orange-soft);
+  color: var(--orange);
+}
+
+.gn-tag-exportado {
+  background: var(--green-soft);
+  color: var(--green);
+}
+
+.gn-acciones {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.gn-btn-secundario {
+  border: 1px solid var(--surface-border);
+  background: var(--surface);
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.gn-del {
+  border: none;
+  background: transparent;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  font-size: 13px;
+  padding: 4px 8px;
+  border-radius: 6px;
+}
+
+.gn-del:hover {
+  background: var(--red-soft);
+  color: var(--red);
+}
+
+@media (max-width: 880px) {
+  .gn-head {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .gn-head-acciones {
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 640px) {
+  .gn-form-grid {
+    grid-template-columns: 1fr;
+  }
+  .gn-form-direccion {
+    grid-column: span 1;
+  }
+}

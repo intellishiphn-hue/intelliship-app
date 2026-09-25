@@ -6,6 +6,10 @@ import Sidebar from './components/layout/Sidebar'
 import Topbar from './components/layout/Topbar'
 import Dashboard from './pages/Dashboard'
 import Placeholder from './pages/Placeholder'
+import Bodega from './pages/Bodega'
+import GuiasNacionales from './pages/GuiasNacionales'
+import EnvioGuias from './pages/EnvioGuias'
+import CargaChina from './pages/CargaChina'
 import Login from './pages/Login'
 import Empleados from './pages/Empleados'
 import Usuarios from './pages/Usuarios'
@@ -36,10 +40,10 @@ export default function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/" element={<PanelLayout><Dashboard /></PanelLayout>} />
           <Route path="/buzon" element={<PanelLayout><Placeholder title="Buzon Intelliship" /></PanelLayout>} />
-          <Route path="/guias" element={<PanelLayout><Placeholder title="Envio de guias" /></PanelLayout>} />
-          <Route path="/guias-nacionales" element={<PanelLayout><Placeholder title="Guias nacionales" /></PanelLayout>} />
-          <Route path="/bodega" element={<PanelLayout><Placeholder title="Bodega" /></PanelLayout>} />
-          <Route path="/carga-china" element={<PanelLayout><Placeholder title="Carga China" /></PanelLayout>} />
+          <Route path="/guias" element={<PanelLayout><EnvioGuias /></PanelLayout>} />
+          <Route path="/guias-nacionales" element={<PanelLayout><GuiasNacionales /></PanelLayout>} />
+          <Route path="/bodega" element={<PanelLayout><Bodega /></PanelLayout>} />
+          <Route path="/carga-china" element={<PanelLayout><CargaChina /></PanelLayout>} />
           <Route path="/personal" element={<PanelLayout><Empleados /></PanelLayout>} />
           <Route path="/asistencia" element={<PanelLayout><Asistencia /></PanelLayout>} />
           <Route path="/vacaciones" element={<PanelLayout><Vacaciones /></PanelLayout>} />
