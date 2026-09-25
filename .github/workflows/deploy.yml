@@ -1,9 +1,17 @@
 name: Deploy
 
-# Publica el panel, reglas de Firestore/Storage e indices a Firebase cada
-# vez que se sube codigo a main. Requiere el secreto
-# FIREBASE_SERVICE_ACCOUNT_INTELLISHIP en GitHub (Settings -> Secrets and
-# variables -> Actions), con el JSON de la cuenta de servicio de Firebase.
+# Publica el panel, reglas de Firestore/Storage/indices y las Cloud
+# Functions (automatizaciones de WhatsApp) a Firebase cada vez que se sube
+# codigo a main. Requiere el secreto FIREBASE_SERVICE_ACCOUNT_INTELLISHIP en
+# GitHub (Settings -> Secrets and variables -> Actions), con el JSON de la
+# cuenta de servicio de Firebase.
+#
+# Desplegar Cloud Functions (Gen 2) necesita mas permisos que solo Hosting/
+# Firestore/Storage: si el primer deploy despues de agregar 'functions' al
+# --only falla con un error de permisos, la cuenta de servicio necesita los
+# roles "Cloud Functions Admin", "Service Account User", "Artifact Registry
+# Administrator" (o "Editor") y "Secret Manager Secret Accessor" en
+# IAM > Cuentas de servicio, en la consola de Google Cloud del proyecto.
 on:
   push:
     branches: [main]
@@ -34,11 +42,11 @@ jobs:
         run: npm ci
       - name: Build del panel
         run: npm run build
-      - name: Publicar en Firebase (Hosting, Firestore, Storage)
+      - name: Publicar en Firebase (Hosting, Firestore, Storage, Functions)
         env:
           GOOGLE_APPLICATION_CREDENTIALS_JSON: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_INTELLISHIP }}
         run: |
           echo "$GOOGLE_APPLICATION_CREDENTIALS_JSON" > /tmp/firebase-sa.json
           export GOOGLE_APPLICATION_CREDENTIALS=/tmp/firebase-sa.json
-          npx firebase-tools@15 deploy --only hosting,firestore,storage --project "$FIREBASE_PROJECT" --non-interactive
+          npx firebase-tools@15 deploy --only hosting,firestore,storage,functions --project "$FIREBASE_PROJECT" --non-interactive
           rm -f /tmp/firebase-sa.json

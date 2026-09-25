@@ -122,5 +122,14 @@ service cloud.firestore {
       allow create, update: if estaAutenticado();
       allow delete: if esAdmin();
     }
+
+    // Bitacora de los mensajes de WhatsApp que mandan las Cloud Functions
+    // (recibo de pago, cambio de estado de envio). Las funciones escriben
+    // con el SDK de Admin (no pasan por estas reglas); esto solo controla
+    // quien puede CONSULTAR la bitacora desde el panel.
+    match /waLogs/{id} {
+      allow read: if esCoordinadorOAdmin();
+      allow write: if false;
+    }
   }
 }

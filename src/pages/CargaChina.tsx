@@ -8,6 +8,7 @@ import {
   orderBy,
   query,
   updateDoc,
+  writeBatch,
 } from 'firebase/firestore'
 import { db } from '../lib/firebase'
 import { useAuth } from '../contexts/AuthContext'
@@ -131,7 +132,7 @@ export default function CargaChina() {
         <TabClientes clientes={clientes} esAdmin={esAdmin} setError={setError} />
       )}
       {tab === 'contenedores' && (
-        <TabContenedores contenedores={contenedores} esAdmin={esAdmin} setError={setError} />
+        <TabContenedores contenedores={contenedores} recibos={recibos} esAdmin={esAdmin} setError={setError} />
       )}
       {tab === 'recibos' && (
         <TabRecibos
@@ -272,10 +273,12 @@ function TabClientes({
 
 function TabContenedores({
   contenedores,
+  recibos,
   esAdmin,
   setError,
 }: {
   contenedores: Contenedor[]
+  recibos: Recibo[]
   esAdmin: boolean
   setError: (e: string | null) => void
 }) {
@@ -313,6 +316,27 @@ function TabContenedores({
     } catch (err) {
       console.error(err)
       setError('No se pudo actualizar el estado.')
+    }
+  }
+
+  async function sincronizarRecibos(cont: Contenedor) {
+    const reciborsDelContenedor = recibos.filter((r) => r.contenedorId === cont.id)
+    if (reciborsDelContenedor.length === 0) return
+    if (
+      !confirm(
+        `Esto va a poner el estado "${cont.estado}" en los ${reciborsDelContenedor.length} recibo(s) de este contenedor, y avisa por WhatsApp a cada cliente. ¿Continuar?`
+      )
+    )
+      return
+    try {
+      const batch = writeBatch(db)
+      reciborsDelContenedor.forEach((r) => {
+        batch.update(doc(db, 'chinaRecibos', r.id), { estado: cont.estado })
+      })
+      await batch.commit()
+    } catch (err) {
+      console.error(err)
+      setError('No se pudo sincronizar el estado a los recibos.')
     }
   }
 
@@ -387,6 +411,14 @@ function TabContenedores({
                   </option>
                 ))}
               </select>
+              <button
+                className="cc-sync-btn"
+                onClick={() => sincronizarRecibos(c)}
+                disabled={!recibos.some((r) => r.contenedorId === c.id)}
+                title="Aplica el estado actual a todos los recibos de este contenedor y avisa por WhatsApp a cada cliente"
+              >
+                📲 Aplicar estado a sus recibos y avisar por WhatsApp
+              </button>
               <details className="cc-historial">
                 <summary>Historial ({(c.historialEstados || []).length})</summary>
                 <ul>
