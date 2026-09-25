@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { collection, onSnapshot } from 'firebase/firestore'
 import { db } from '../lib/firebase'
 import { useAuth } from '../contexts/AuthContext'
+import { TIPOS_REQUERIDOS } from './Documentos'
 import './Dashboard.css'
 
 const HOY = new Date().toLocaleDateString('es-HN', {
@@ -15,13 +16,35 @@ export default function Dashboard() {
   const { user } = useAuth()
   const navigate = useNavigate()
   const [totalEmpleados, setTotalEmpleados] = useState<number | null>(null)
+  const [empleadosActivos, setEmpleadosActivos] = useState<{ id: string; activo?: boolean }[]>([])
+  const [documentosPorEmpleado, setDocumentosPorEmpleado] = useState<Record<string, Set<string>>>({})
 
   useEffect(() => {
-    const unsub = onSnapshot(collection(db, 'empleados'), (snap) => {
+    const unsub1 = onSnapshot(collection(db, 'empleados'), (snap) => {
       setTotalEmpleados(snap.size)
+      setEmpleadosActivos(
+        snap.docs.map((d) => ({ id: d.id, activo: (d.data() as { activo?: boolean }).activo }))
+      )
     })
-    return unsub
+    const unsub2 = onSnapshot(collection(db, 'documentos'), (snap) => {
+      const mapa: Record<string, Set<string>> = {}
+      snap.docs.forEach((d) => {
+        const data = d.data() as { empleadoId: string; tipo: string }
+        if (!mapa[data.empleadoId]) mapa[data.empleadoId] = new Set()
+        mapa[data.empleadoId].add(data.tipo)
+      })
+      setDocumentosPorEmpleado(mapa)
+    })
+    return () => {
+      unsub1()
+      unsub2()
+    }
   }, [])
+
+  const expedientesIncompletos = empleadosActivos.filter((e) => e.activo !== false).filter((e) => {
+    const tipos = documentosPorEmpleado[e.id] || new Set<string>()
+    return TIPOS_REQUERIDOS.some((t) => !tipos.has(t))
+  }).length
 
   const nombre = user?.email?.split('@')[0] ?? ''
 
@@ -122,8 +145,9 @@ export default function Dashboard() {
               <div className="card-title">Documentacion pendiente</div>
               <div className="card-sub">Expedientes incompletos</div>
             </div>
+            <a className="card-link" href="#" onClick={(e) => { e.preventDefault(); navigate('/documentos') }}>Ver &rarr;</a>
           </div>
-          <div className="stat-big orange">0</div>
+          <div className="stat-big orange">{totalEmpleados === null ? '—' : expedientesIncompletos}</div>
         </div>
       </div>
     </div>

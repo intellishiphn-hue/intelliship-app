@@ -112,5 +112,15 @@ service cloud.firestore {
       allow create, update: if esCoordinadorOAdmin();
       allow delete: if esAdmin();
     }
+
+    // Documentos del expediente de cada empleado (identidad, contrato,
+    // etc.). El archivo en si vive en Storage (documentos/{empleadoId}/...);
+    // esto es solo el metadato. Igual criterio que empleados: cualquier
+    // autenticado puede subir/editar, borrar definitivamente es solo admin.
+    match /documentos/{id} {
+      allow read: if estaAutenticado();
+      allow create, update: if estaAutenticado();
+      allow delete: if esAdmin();
+    }
   }
 }

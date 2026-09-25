@@ -10,6 +10,7 @@ import Bodega from './pages/Bodega'
 import GuiasNacionales from './pages/GuiasNacionales'
 import EnvioGuias from './pages/EnvioGuias'
 import CargaChina from './pages/CargaChina'
+import Documentos from './pages/Documentos'
 import Login from './pages/Login'
 import Empleados from './pages/Empleados'
 import Usuarios from './pages/Usuarios'
@@ -47,7 +48,7 @@ export default function App() {
           <Route path="/personal" element={<PanelLayout><Empleados /></PanelLayout>} />
           <Route path="/asistencia" element={<PanelLayout><Asistencia /></PanelLayout>} />
           <Route path="/vacaciones" element={<PanelLayout><Vacaciones /></PanelLayout>} />
-          <Route path="/documentos" element={<PanelLayout><Placeholder title="Documentos" /></PanelLayout>} />
+          <Route path="/documentos" element={<PanelLayout><Documentos /></PanelLayout>} />
           <Route path="/nomina" element={<PanelLayout><Pagos /></PanelLayout>} />
           <Route path="/pagos" element={<PanelLayout><Pagos /></PanelLayout>} />
           <Route path="/reportes" element={<PanelLayout><Placeholder title="Reportes" /></PanelLayout>} />

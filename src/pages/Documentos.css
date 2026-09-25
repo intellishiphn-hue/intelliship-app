@@ -1,0 +1,244 @@
+.doc-page {
+  padding: 28px 32px 48px;
+  max-width: 1100px;
+}
+
+.doc-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  gap: 12px;
+}
+
+.doc-head h1 {
+  font-size: 22px;
+  font-weight: 700;
+  margin: 0 0 4px;
+  color: var(--text);
+}
+
+.doc-head p {
+  margin: 0;
+  color: var(--text-tertiary);
+  font-size: 13px;
+}
+
+.doc-buscador {
+  border: 1px solid var(--surface-border);
+  border-radius: var(--radius-sm);
+  padding: 8px 12px;
+  font-size: 13px;
+  font-family: var(--font);
+  color: var(--text);
+  background: var(--surface);
+  min-width: 240px;
+}
+
+.doc-error {
+  background: var(--red-soft);
+  color: var(--red);
+  font-size: 13px;
+  font-weight: 600;
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  margin-bottom: 16px;
+}
+
+.doc-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.doc-fila-card {
+  background: var(--surface);
+  border: 1px solid var(--surface-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+}
+
+.doc-fila-head {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 18px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+  font-family: var(--font);
+}
+
+.doc-fila-abierta .doc-fila-head {
+  border-bottom: 1px solid var(--surface-border);
+}
+
+.doc-fila-nombre {
+  font-weight: 600;
+  color: var(--text);
+  font-size: 14px;
+}
+
+.doc-fila-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12.5px;
+  color: var(--text-tertiary);
+  white-space: nowrap;
+}
+
+.doc-badge {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 9px;
+  border-radius: 999px;
+}
+
+.doc-badge-ok {
+  background: var(--green-soft);
+  color: var(--green);
+}
+
+.doc-badge-falta {
+  background: var(--orange-soft);
+  color: var(--orange);
+}
+
+.doc-fila-body {
+  padding: 14px 18px 18px;
+}
+
+.doc-faltantes {
+  font-size: 12.5px;
+  color: var(--orange);
+  margin: 0 0 12px;
+}
+
+.doc-vacio {
+  font-size: 13px;
+  color: var(--text-tertiary);
+  margin: 0 0 12px;
+}
+
+.doc-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  margin-bottom: 14px;
+}
+
+.doc-table th {
+  text-align: left;
+  padding: 8px 10px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  color: var(--text-tertiary);
+  border-bottom: 1px solid var(--surface-border);
+  text-transform: uppercase;
+}
+
+.doc-table td {
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--surface-border);
+  color: var(--text-secondary);
+}
+
+.doc-table tr:last-child td {
+  border-bottom: none;
+}
+
+.doc-link {
+  border: none;
+  background: transparent;
+  color: var(--accent);
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+  padding: 0;
+  font-family: var(--font);
+}
+
+.doc-link:hover {
+  text-decoration: underline;
+}
+
+.doc-del {
+  border: none;
+  background: transparent;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  font-size: 13px;
+  padding: 4px 8px;
+  border-radius: 6px;
+}
+
+.doc-del:hover {
+  background: var(--red-soft);
+  color: var(--red);
+}
+
+.doc-subir {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  border-top: 1px dashed var(--surface-border);
+  padding-top: 14px;
+}
+
+.doc-subir select {
+  border: 1px solid var(--surface-border);
+  border-radius: var(--radius-sm);
+  padding: 7px 10px;
+  font-size: 12.5px;
+  font-family: var(--font);
+  color: var(--text);
+  background: var(--surface);
+}
+
+.doc-subir input[type='file'] {
+  font-size: 12.5px;
+  color: var(--text-secondary);
+  max-width: 220px;
+}
+
+.doc-subiendo {
+  font-size: 12px;
+  color: var(--text-tertiary);
+  font-style: italic;
+}
+
+@media (max-width: 880px) {
+  .doc-head {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .doc-buscador {
+    min-width: 0;
+  }
+  .doc-fila-info {
+    flex-wrap: wrap;
+    white-space: normal;
+    justify-content: flex-end;
+  }
+}
+
+@media (max-width: 640px) {
+  .doc-table {
+    display: block;
+    overflow-x: auto;
+  }
+  .doc-subir {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .doc-subir input[type='file'] {
+    max-width: none;
+  }
+}
