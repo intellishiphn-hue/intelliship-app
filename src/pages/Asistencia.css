@@ -47,7 +47,9 @@
   border: 1px solid var(--surface-border);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-card);
-  overflow: hidden;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
 }
 
 .asis-card-titulo-row {
@@ -263,4 +265,12 @@
   background: var(--accent-soft);
   border-radius: var(--radius-sm);
   padding: 10px 12px;
+}
+
+@media (max-width: 880px) {
+  .asis-head {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
 }

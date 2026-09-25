@@ -73,7 +73,9 @@
   border: 1px solid var(--surface-border);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-card);
-  overflow: hidden;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
 }
 
 .usr-table {
@@ -106,4 +108,10 @@
   font-size: 12px;
   color: var(--text-tertiary);
   margin-top: 14px;
+}
+
+@media (max-width: 640px) {
+  .usr-form {
+    grid-template-columns: 1fr;
+  }
 }

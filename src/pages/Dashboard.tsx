@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { collection, onSnapshot } from 'firebase/firestore'
 import { db } from '../lib/firebase'
 import { useAuth } from '../contexts/AuthContext'
@@ -12,6 +13,7 @@ const HOY = new Date().toLocaleDateString('es-HN', {
 
 export default function Dashboard() {
   const { user } = useAuth()
+  const navigate = useNavigate()
   const [totalEmpleados, setTotalEmpleados] = useState<number | null>(null)
 
   useEffect(() => {
@@ -44,11 +46,11 @@ export default function Dashboard() {
       </div>
 
       <div className="quick-row">
-        <button className="quick-btn quick-in">
+        <button className="quick-btn quick-in" onClick={() => navigate('/asistencia')}>
           <span className="quick-btn-icon">→]</span>
           Marcar entrada
         </button>
-        <button className="quick-btn quick-out">
+        <button className="quick-btn quick-out" onClick={() => navigate('/asistencia')}>
           <span className="quick-btn-icon">[→</span>
           Marcar salida
         </button>

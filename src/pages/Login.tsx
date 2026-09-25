@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react'
 import { Navigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
+import logoIntelliship from '../assets/intelliship-logo.png'
 import './Login.css'
 
 export default function Login() {
@@ -31,8 +32,7 @@ export default function Login() {
   return (
     <div className="login-screen">
       <form className="login-card" onSubmit={onSubmit}>
-        <div className="login-logo">IS</div>
-        <h1>INTELLISHIP</h1>
+        <img src={logoIntelliship} alt="INTELLISHIP" className="login-logo-img" />
         <p className="login-sub">Inicia sesion en el panel unificado</p>
 
         <label className="login-label">Correo</label>

@@ -6,8 +6,13 @@
   background: var(--bg);
 }
 
+.login-screen {
+  padding: 20px;
+}
+
 .login-card {
-  width: 360px;
+  width: 100%;
+  max-width: 360px;
   background: var(--surface);
   border: 1px solid var(--surface-border);
   border-radius: var(--radius-lg);
@@ -15,28 +20,13 @@
   padding: 32px 28px;
   display: flex;
   flex-direction: column;
+  box-sizing: border-box;
 }
 
-.login-logo {
-  width: 44px;
-  height: 44px;
-  border-radius: 11px;
-  background: linear-gradient(135deg, #2f6bff, #7c3aed);
-  color: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 800;
-  font-size: 16px;
-  margin-bottom: 16px;
-}
-
-.login-card h1 {
-  font-size: 19px;
-  font-weight: 800;
-  margin: 0 0 4px;
-  color: var(--text);
-  letter-spacing: 0.3px;
+.login-logo-img {
+  height: 40px;
+  width: auto;
+  margin-bottom: 20px;
 }
 
 .login-sub {

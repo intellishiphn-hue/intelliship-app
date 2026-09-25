@@ -1,5 +1,6 @@
 import { NavLink } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
+import logoIcon from '../../assets/intelliship-icon.png'
 import './Sidebar.css'
 
 type NavItem = {
@@ -73,16 +74,24 @@ const ROL_LABEL: Record<string, string> = {
   empleado: 'Empleado',
 }
 
-export default function Sidebar() {
+type SidebarProps = {
+  abierto?: boolean
+  onCerrar?: () => void
+}
+
+export default function Sidebar({ abierto, onCerrar }: SidebarProps) {
   const { rol } = useAuth()
   return (
-    <aside className="sb">
+    <>
+      {abierto && <div className="sb-overlay" onClick={onCerrar} />}
+      <aside className={'sb' + (abierto ? ' sb-open' : '')}>
       <div className="sb-brand">
-        <div className="sb-logo">IS</div>
+        <img src={logoIcon} alt="INTELLISHIP" className="sb-logo" />
         <div className="sb-brand-text">
           <div className="sb-brand-name">INTELLISHIP</div>
           <div className="sb-brand-sub">Panel unificado</div>
         </div>
+        <button className="sb-close-btn" onClick={onCerrar} aria-label="Cerrar menu">✕</button>
       </div>
 
       <div className="sb-role">
@@ -103,6 +112,7 @@ export default function Sidebar() {
                 to={item.to}
                 className={({ isActive }) => 'sb-item' + (isActive ? ' active' : '')}
                 end={item.to === '/'}
+                onClick={onCerrar}
               >
                 <span className="sb-item-icon">{item.icon}</span>
                 {item.label}
@@ -120,6 +130,7 @@ export default function Sidebar() {
           Sincronizado
         </div>
       </div>
-    </aside>
+      </aside>
+    </>
   )
 }

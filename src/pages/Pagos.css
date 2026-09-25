@@ -93,7 +93,9 @@
   border: 1px solid var(--surface-border);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-card);
-  overflow: hidden;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
 }
 
 .pag-card-titulo-row {
@@ -243,4 +245,22 @@
 .pag-detalle-grid strong {
   color: var(--text);
   font-weight: 600;
+}
+
+@media (max-width: 880px) {
+  .pag-head {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .pag-head-botones {
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 640px) {
+  .pag-form-grid {
+    grid-template-columns: 1fr;
+  }
 }

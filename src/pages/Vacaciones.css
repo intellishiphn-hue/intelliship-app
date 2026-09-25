@@ -95,7 +95,9 @@
   border: 1px solid var(--surface-border);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-card);
-  overflow: hidden;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
   margin-bottom: 20px;
 }
 
@@ -190,4 +192,18 @@
 .vac-del:hover {
   background: var(--red-soft);
   color: var(--red);
+}
+
+@media (max-width: 880px) {
+  .vac-head {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+}
+
+@media (max-width: 640px) {
+  .vac-form-grid {
+    grid-template-columns: 1fr;
+  }
 }

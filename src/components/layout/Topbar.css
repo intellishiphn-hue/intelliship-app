@@ -85,3 +85,56 @@
   background: var(--bg);
   color: var(--text);
 }
+
+.tb-menu-btn {
+  display: none;
+  border: none;
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+  padding: 6px;
+  margin-right: 10px;
+  border-radius: 8px;
+  flex-shrink: 0;
+}
+
+.tb-menu-btn:hover {
+  background: var(--bg);
+}
+
+@media (max-width: 880px) {
+  .tb {
+    padding: 0 14px;
+    gap: 8px;
+  }
+
+  .tb-menu-btn {
+    display: flex;
+  }
+
+  .tb-search {
+    width: auto;
+    flex: 1;
+    min-width: 0;
+    padding: 8px 10px;
+  }
+
+  .tb-search kbd {
+    display: none;
+  }
+
+  .tb-user-name,
+  .tb-user-role {
+    display: none;
+  }
+
+  .tb-user {
+    gap: 6px;
+  }
+}
+
+@media (max-width: 520px) {
+  .tb-search input::placeholder {
+    font-size: 12px;
+  }
+}

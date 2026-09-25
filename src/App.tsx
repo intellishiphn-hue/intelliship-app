@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { AuthProvider } from './contexts/AuthContext'
 import RutaProtegida from './components/auth/RutaProtegida'
@@ -13,12 +14,13 @@ import Pagos from './pages/Pagos'
 import Asistencia from './pages/Asistencia'
 
 function PanelLayout({ children }: { children: React.ReactNode }) {
+  const [menuAbierto, setMenuAbierto] = useState(false)
   return (
     <RutaProtegida>
       <div className="app-shell">
-        <Sidebar />
+        <Sidebar abierto={menuAbierto} onCerrar={() => setMenuAbierto(false)} />
         <div style={{ flex: 1, minWidth: 0 }}>
-          <Topbar />
+          <Topbar onAbrirMenu={() => setMenuAbierto(true)} />
           {children}
         </div>
       </div>

@@ -23,3 +23,14 @@ button, input, select, textarea {
   display: flex;
   min-height: 100vh;
 }
+
+@media (max-width: 880px) {
+  .emp-page,
+  .dash,
+  .pag-page,
+  .usr-page,
+  .vac-page,
+  .asis-page {
+    padding: 18px 16px 32px;
+  }
+}
