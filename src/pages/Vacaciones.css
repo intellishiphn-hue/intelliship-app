@@ -1,0 +1,193 @@
+.vac-page {
+  padding: 28px 32px 48px;
+  max-width: 1200px;
+}
+
+.vac-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.vac-head h1 {
+  font-size: 22px;
+  font-weight: 700;
+  margin: 0 0 4px;
+  color: var(--text);
+}
+
+.vac-head p {
+  margin: 0;
+  color: var(--text-tertiary);
+  font-size: 13px;
+}
+
+.vac-error {
+  background: var(--red-soft);
+  color: var(--red);
+  font-size: 13px;
+  font-weight: 600;
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  margin-bottom: 16px;
+}
+
+.vac-form {
+  background: var(--surface);
+  border: 1px solid var(--surface-border);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: var(--shadow-card);
+}
+
+.vac-form-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  margin-bottom: 10px;
+}
+
+.vac-form-notas {
+  grid-column: span 3;
+}
+
+.vac-form label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 5px;
+}
+
+.vac-form input,
+.vac-form select {
+  width: 100%;
+  border: 1px solid var(--surface-border);
+  border-radius: var(--radius-sm);
+  padding: 9px 11px;
+  font-size: 13px;
+  font-family: var(--font);
+  color: var(--text);
+  background: var(--surface);
+}
+
+.vac-form input:focus,
+.vac-form select:focus {
+  outline: 2px solid var(--accent-soft);
+  border-color: var(--accent);
+}
+
+.vac-form input:disabled {
+  color: var(--text-tertiary);
+  background: var(--accent-soft);
+}
+
+.vac-form-nota-adjunto {
+  font-size: 12px;
+  color: var(--text-tertiary);
+  margin: 0 0 14px;
+}
+
+.vac-card {
+  background: var(--surface);
+  border: 1px solid var(--surface-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+
+.vac-card-titulo {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text);
+  padding: 16px 18px 0;
+}
+
+.vac-card-titulo-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 18px 0;
+}
+
+.vac-card-titulo-row .vac-card-titulo {
+  padding: 0;
+}
+
+.vac-filtro {
+  border: 1px solid var(--surface-border);
+  border-radius: var(--radius-sm);
+  padding: 6px 10px;
+  font-size: 12.5px;
+  font-family: var(--font);
+  color: var(--text);
+  background: var(--surface);
+}
+
+.vac-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  margin-top: 12px;
+}
+
+.vac-table th {
+  text-align: left;
+  padding: 12px 18px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  color: var(--text-tertiary);
+  border-bottom: 1px solid var(--surface-border);
+  text-transform: uppercase;
+}
+
+.vac-table td {
+  padding: 12px 18px;
+  border-bottom: 1px solid var(--surface-border);
+  color: var(--text-secondary);
+}
+
+.vac-table tr:last-child td {
+  border-bottom: none;
+}
+
+.vac-nombre {
+  font-weight: 600;
+  color: var(--text);
+}
+
+.vac-pendientes {
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.vac-notas {
+  max-width: 260px;
+}
+
+.vac-adjunto-tag {
+  display: inline-block;
+  margin-left: 8px;
+  font-size: 11px;
+  color: var(--text-tertiary);
+  font-style: italic;
+}
+
+.vac-del {
+  border: none;
+  background: transparent;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  font-size: 13px;
+  padding: 4px 8px;
+  border-radius: 6px;
+}
+
+.vac-del:hover {
+  background: var(--red-soft);
+  color: var(--red);
+}
