@@ -33,6 +33,8 @@
 const { initializeApp } = require('firebase-admin/app')
 const { getFirestore, FieldValue } = require('firebase-admin/firestore')
 const { onDocumentCreated, onDocumentUpdated } = require('firebase-functions/v2/firestore')
+const { onCall, HttpsError } = require('firebase-functions/v2/https')
+const pdfParse = require('pdf-parse')
 const { defineSecret } = require('firebase-functions/params')
 const logger = require('firebase-functions/logger')
 
@@ -304,3 +306,68 @@ exports.notificarEnvioGuia = onDocumentCreated(
     })
   }
 )
+
+
+// Lee un PDF de guias de Cargo Expreso (una etiqueta por pagina, el mismo
+// formato que exporta su sistema al despachar varios paquetes) y devuelve
+// los datos de cada paquete (nombre, telefono, guia, fecha) para que el
+// panel los muestre en una vista previa ANTES de crear nada -- no escribe
+// en Firestore, eso lo hace el navegador despues de que el admin confirma
+// la vista previa, con su propia sesion. No necesita secretos.
+//
+// Formato esperado por etiqueta (confirmado contra un PDF real de 19
+// guias): cada bloque empieza con "GRUPO LOGISTICO SACA S. DE R.L.",
+// trae "Nombre Destinatario" seguido del nombre en la siguiente linea,
+// "Telefono" seguido del telefono, un numero de guia suelto (formato
+// 123456789-1) y una fecha suelta (formato D-M-AAAA).
+function parseGuiasCargoExpreso(texto) {
+  const bloques = texto.split(/GRUPO LOGISTICO SACA S\. DE R\.L\./).slice(1)
+  const resultados = []
+  for (const bloque of bloques) {
+    const lineas = bloque
+      .split('\n')
+      .map((l) => l.trim())
+      .filter(Boolean)
+    const idxNombre = lineas.indexOf('Nombre Destinatario')
+    const idxTelefono = lineas.indexOf('Teléfono')
+    const idxGuia = lineas.findIndex((l) => /^\d{6,12}-\d+$/.test(l))
+    const idxFecha = lineas.findIndex((l) => /^\d{1,2}-\d{1,2}-\d{4}$/.test(l))
+    if (idxNombre === -1 || idxTelefono === -1 || idxGuia === -1) continue
+    const nombre = lineas[idxNombre + 1] || ''
+    const telefono = lineas[idxTelefono + 1] || ''
+    const guia = lineas[idxGuia]
+    let fecha = null
+    if (idxFecha !== -1) {
+      const [d, m, y] = lineas[idxFecha].split('-')
+      fecha = `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`
+    }
+    resultados.push({
+      nombre,
+      telefono,
+      guia,
+      fecha,
+      telefonoValido: /^\d{3,4}-\d{4}$/.test(telefono),
+    })
+  }
+  return resultados
+}
+
+exports.procesarGuiasPdf = onCall({ cors: true }, async (request) => {
+  if (!request.auth) {
+    throw new HttpsError('unauthenticated', 'Hace falta iniciar sesion.')
+  }
+  const base64 = request.data?.pdfBase64
+  if (!base64) {
+    throw new HttpsError('invalid-argument', 'Falta el PDF (pdfBase64).')
+  }
+  const buffer = Buffer.from(base64, 'base64')
+  let data
+  try {
+    data = await pdfParse(buffer)
+  } catch (err) {
+    logger.error('No se pudo leer el PDF', err)
+    throw new HttpsError('invalid-argument', 'No se pudo leer el PDF. Verifica que sea un PDF de guias de Cargo Expreso.')
+  }
+  const filas = parseGuiasCargoExpreso(data.text)
+  return { filas, totalPaginas: data.numpages }
+})

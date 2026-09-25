@@ -221,3 +221,65 @@
     grid-column: span 1;
   }
 }
+
+.eg-head-botones {
+  display: flex;
+  gap: 8px;
+}
+
+.eg-pdf-card {
+  border: 1px solid var(--surface-border);
+  border-radius: 10px;
+  padding: 16px;
+  margin-bottom: 20px;
+  background: var(--surface);
+}
+
+.eg-pdf-nota {
+  color: var(--text-tertiary);
+  font-size: 13px;
+  margin: 0 0 10px;
+}
+
+.eg-pdf-controles {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+.eg-pdf-preview {
+  margin-bottom: 10px;
+}
+
+.eg-pdf-preview input {
+  width: 100%;
+  border: 1px solid var(--surface-border);
+  border-radius: 6px;
+  padding: 4px 6px;
+  font-size: 12.5px;
+}
+
+.eg-pdf-fila-alerta {
+  background: color-mix(in srgb, red 8%, transparent);
+}
+
+.eg-pdf-log {
+  margin-top: 12px;
+  padding: 10px;
+  background: #111;
+  color: #0f0;
+  font-size: 0.8em;
+  max-height: 200px;
+  overflow-y: auto;
+  border-radius: 6px;
+  white-space: pre-wrap;
+}
+
+@media (max-width: 640px) {
+  .eg-head-botones {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}

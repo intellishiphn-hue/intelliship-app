@@ -2,6 +2,7 @@ import { initializeApp } from 'firebase/app'
 import { getAuth } from 'firebase/auth'
 import { getFirestore } from 'firebase/firestore'
 import { getStorage } from 'firebase/storage'
+import { getFunctions } from 'firebase/functions'
 
 // Config leida de variables de entorno (VITE_*), nunca hardcodeada en el
 // codigo fuente. Ver .env.example. En local va en .env.local (no se sube
@@ -19,6 +20,7 @@ export const app = initializeApp(firebaseConfig)
 export const auth = getAuth(app)
 export const db = getFirestore(app)
 export const storage = getStorage(app)
+export const functions = getFunctions(app)
 
 // Segunda instancia de la app, solo para que el admin pueda crear cuentas
 // nuevas (createUserWithEmailAndPassword) sin que eso cierre su propia
