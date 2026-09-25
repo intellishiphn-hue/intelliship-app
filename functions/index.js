@@ -308,18 +308,18 @@ exports.notificarEnvioGuia = onDocumentCreated(
 )
 
 
-// Lee un PDF de guias de Cargo Expreso (una etiqueta por pagina, el mismo
-// formato que exporta su sistema al despachar varios paquetes) y devuelve
-// los datos de cada paquete (nombre, telefono, guia, fecha) para que el
-// panel los muestre en una vista previa ANTES de crear nada -- no escribe
-// en Firestore, eso lo hace el navegador despues de que el admin confirma
-// la vista previa, con su propia sesion. No necesita secretos.
+// Lee un PDF de guias (Cargo Expreso o Forza, una etiqueta por pagina, el
+// mismo formato que exporta cada courier al despachar varios paquetes) y
+// devuelve los datos de cada paquete (nombre, telefono, guia, fecha) para
+// que el panel los muestre en una vista previa ANTES de crear nada -- no
+// escribe en Firestore, eso lo hace el navegador despues de que el admin
+// confirma la vista previa, con su propia sesion. No necesita secretos.
 //
-// Formato esperado por etiqueta (confirmado contra un PDF real de 19
-// guias): cada bloque empieza con "GRUPO LOGISTICO SACA S. DE R.L.",
-// trae "Nombre Destinatario" seguido del nombre en la siguiente linea,
-// "Telefono" seguido del telefono, un numero de guia suelto (formato
-// 123456789-1) y una fecha suelta (formato D-M-AAAA).
+// Formato esperado por etiqueta de Cargo Expreso (confirmado contra un PDF
+// real de 19 guias): cada bloque empieza con "GRUPO LOGISTICO SACA S. DE
+// R.L.", trae "Nombre Destinatario" seguido del nombre en la siguiente
+// linea, "Telefono" seguido del telefono, un numero de guia suelto
+// (formato 123456789-1) y una fecha suelta (formato D-M-AAAA).
 function parseGuiasCargoExpreso(texto) {
   const bloques = texto.split(/GRUPO LOGISTICO SACA S\. DE R\.L\./).slice(1)
   const resultados = []
@@ -352,6 +352,62 @@ function parseGuiasCargoExpreso(texto) {
   return resultados
 }
 
+// Deja un telefono en el mismo formato local que usa el resto del panel
+// (8 digitos con guion, ej. "9999-9999"), venga como venga en la etiqueta
+// (Forza lo imprime en formato internacional, ej. "+50488164497").
+function formatearTelefonoLocalHN(crudo) {
+  const soloDigitos = String(crudo || '').replace(/\D/g, '')
+  let ocho = soloDigitos
+  if (soloDigitos.startsWith('504') && soloDigitos.length === 11) ocho = soloDigitos.slice(3)
+  if (ocho.length !== 8) return String(crudo || '').trim()
+  return `${ocho.slice(0, 4)}-${ocho.slice(4)}`
+}
+
+// Formato esperado por etiqueta de Forza (confirmado contra un PDF real de
+// 1 guia -- si al usarlo con mas guias aparecen casos que no calcen,
+// revisar aqui primero). Cada bloque empieza con "INTELLISHIP HONDURAS"
+// (el remitente, siempre el mismo). Dentro del bloque hay dos lineas
+// "Tel.: ..." -- la primera es el telefono de INTELLISHIP (remitente, se
+// ignora), la segunda es el telefono del destinatario, y el nombre del
+// destinatario es la linea justo antes de esa segunda "Tel.:". El numero
+// de guia es la unica linea suelta de puros digitos (6 a 10). La fecha
+// sale de la linea "Usuario: ... DD/MM/AAAA HH:MM".
+function parseGuiasForza(texto) {
+  const bloques = texto.split(/INTELLISHIP HONDURAS/).slice(1)
+  const resultados = []
+  for (const bloque of bloques) {
+    const lineas = bloque
+      .split('\n')
+      .map((l) => l.trim())
+      .filter(Boolean)
+    const idxsTel = []
+    lineas.forEach((l, i) => {
+      if (/^Tel\.:/.test(l)) idxsTel.push(i)
+    })
+    if (idxsTel.length < 2) continue
+    const idxTelDestinatario = idxsTel[1]
+    const nombre = lineas[idxTelDestinatario - 1] || ''
+    const telefono = formatearTelefonoLocalHN(lineas[idxTelDestinatario].replace(/^Tel\.:\s*/, ''))
+    const idxGuia = lineas.findIndex((l) => /^\d{6,10}$/.test(l))
+    if (idxGuia === -1) continue
+    const guia = lineas[idxGuia]
+    const idxUsuario = lineas.findIndex((l) => /^Usuario:/.test(l))
+    let fecha = null
+    if (idxUsuario !== -1) {
+      const m = lineas[idxUsuario].match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/)
+      if (m) fecha = `${m[3]}-${String(m[2]).padStart(2, '0')}-${String(m[1]).padStart(2, '0')}`
+    }
+    resultados.push({
+      nombre,
+      telefono,
+      guia,
+      fecha,
+      telefonoValido: /^\d{3,4}-\d{4}$/.test(telefono),
+    })
+  }
+  return resultados
+}
+
 exports.procesarGuiasPdf = onCall({ cors: true }, async (request) => {
   if (!request.auth) {
     throw new HttpsError('unauthenticated', 'Hace falta iniciar sesion.')
@@ -360,14 +416,15 @@ exports.procesarGuiasPdf = onCall({ cors: true }, async (request) => {
   if (!base64) {
     throw new HttpsError('invalid-argument', 'Falta el PDF (pdfBase64).')
   }
+  const empresa = String(request.data?.empresa || 'Cargo Expreso')
   const buffer = Buffer.from(base64, 'base64')
   let data
   try {
     data = await pdfParse(buffer)
   } catch (err) {
     logger.error('No se pudo leer el PDF', err)
-    throw new HttpsError('invalid-argument', 'No se pudo leer el PDF. Verifica que sea un PDF de guias de Cargo Expreso.')
+    throw new HttpsError('invalid-argument', 'No se pudo leer el PDF. Verifica que sea un PDF de guias.')
   }
-  const filas = parseGuiasCargoExpreso(data.text)
+  const filas = empresa.toUpperCase().includes('FORZA') ? parseGuiasForza(data.text) : parseGuiasCargoExpreso(data.text)
   return { filas, totalPaginas: data.numpages }
 })

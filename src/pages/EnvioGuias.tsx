@@ -283,14 +283,14 @@ function SubirPdfGuias({ onListo }: { onListo: () => void }) {
     try {
       const buffer = await archivo.arrayBuffer()
       const pdfBase64 = arrayBufferABase64(buffer)
-      const procesarGuiasPdf = httpsCallable<{ pdfBase64: string }, { filas: Omit<FilaPdf, 'incluir'>[]; totalPaginas: number }>(
-        functions,
-        'procesarGuiasPdf'
-      )
-      const resultado = await procesarGuiasPdf({ pdfBase64 })
+      const procesarGuiasPdf = httpsCallable<
+        { pdfBase64: string; empresa: string },
+        { filas: Omit<FilaPdf, 'incluir'>[]; totalPaginas: number }
+      >(functions, 'procesarGuiasPdf')
+      const resultado = await procesarGuiasPdf({ pdfBase64, empresa })
       const crudo = resultado.data.filas || []
       if (crudo.length === 0) {
-        setError('No se detecto ninguna guia en el PDF. Verifica que sea el formato de etiquetas de Cargo Expreso.')
+        setError('No se detecto ninguna guia en el PDF. Verifica que sea el formato de etiquetas de ' + empresa + '.')
       }
       setFilas(crudo.map((f) => ({ ...f, incluir: f.telefonoValido })))
     } catch (err) {
