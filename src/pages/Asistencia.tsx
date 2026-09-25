@@ -28,8 +28,8 @@ const OFICINA = { lat: 14.115480711491383, lng: -87.17280670912903, radioM: 150 
 type EstadoGps = 'cargando' | 'ok' | 'error'
 
 function ModalMarcar({ empleados, onClose }: { empleados: Empleado[]; onClose: () => void }) {
-  const { user } = useAuth()
-  const [empleadoId, setEmpleadoId] = useState('')
+  const { user, empleadoId: miEmpleadoId } = useAuth()
+  const [empleadoId, setEmpleadoId] = useState(miEmpleadoId || '')
   const [tipo, setTipo] = useState<'entrada' | 'salida'>('entrada')
   const [comentario, setComentario] = useState('')
 
@@ -172,13 +172,19 @@ function ModalMarcar({ empleados, onClose }: { empleados: Empleado[]; onClose: (
         {error && <div className="asis-error">{error}</div>}
 
         <div className="asis-modal-seccion">
-          <label>Selecciona tu nombre *</label>
-          <select value={empleadoId} onChange={(e) => setEmpleadoId(e.target.value)} autoFocus>
-            <option value="">Selecciona...</option>
-            {listaEmpleados.map((e) => (
-              <option key={e.id} value={e.id}>{e.nombre}</option>
-            ))}
-          </select>
+          <label>{miEmpleadoId ? 'Marcando para' : 'Selecciona tu nombre *'}</label>
+          {miEmpleadoId ? (
+            <div className="asis-nombre-fijo">
+              {listaEmpleados.find((e) => e.id === miEmpleadoId)?.nombre || 'Tu cuenta'}
+            </div>
+          ) : (
+            <select value={empleadoId} onChange={(e) => setEmpleadoId(e.target.value)} autoFocus>
+              <option value="">Selecciona...</option>
+              {listaEmpleados.map((e) => (
+                <option key={e.id} value={e.id}>{e.nombre}</option>
+              ))}
+            </select>
+          )}
         </div>
 
         <div className="asis-modal-seccion">

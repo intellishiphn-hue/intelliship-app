@@ -255,3 +255,12 @@
   width: 100%;
   margin-top: 4px;
 }
+
+.asis-nombre-fijo {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--accent);
+  background: var(--accent-soft);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+}

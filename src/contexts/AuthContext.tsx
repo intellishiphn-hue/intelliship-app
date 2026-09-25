@@ -13,6 +13,7 @@ export type Rol = 'admin' | 'coordinador' | 'empleado'
 type AuthState = {
   user: User | null
   rol: Rol | null
+  empleadoId: string | null
   cargando: boolean
   login: (email: string, password: string) => Promise<void>
   logout: () => Promise<void>
@@ -23,6 +24,7 @@ const AuthContext = createContext<AuthState | null>(null)
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [rol, setRol] = useState<Rol | null>(null)
+  const [empleadoId, setEmpleadoId] = useState<string | null>(null)
   const [cargando, setCargando] = useState(true)
 
   useEffect(() => {
@@ -30,14 +32,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(u)
       if (u) {
         try {
-          // Rol guardado en Firestore: usuarios/{uid} -> { rol: 'admin' | 'coordinador' | 'empleado' }
+          // Datos guardados en Firestore: usuarios/{uid} -> { rol, empleadoId? }
+          // empleadoId vincula esta cuenta con su registro en empleados/{id},
+          // para que el reloj marcador sepa automaticamente quien es sin
+          // tener que elegir el nombre de una lista.
           const snap = await getDoc(doc(db, 'usuarios', u.uid))
-          setRol((snap.exists() ? snap.data().rol : 'empleado') as Rol)
+          const data = snap.exists() ? snap.data() : null
+          setRol((data?.rol ?? 'empleado') as Rol)
+          setEmpleadoId((data?.empleadoId as string) ?? null)
         } catch {
           setRol('empleado')
+          setEmpleadoId(null)
         }
       } else {
         setRol(null)
+        setEmpleadoId(null)
       }
       setCargando(false)
     })
@@ -53,7 +62,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, rol, cargando, login, logout }}>
+    <AuthContext.Provider value={{ user, rol, empleadoId, cargando, login, logout }}>
       {children}
     </AuthContext.Provider>
   )

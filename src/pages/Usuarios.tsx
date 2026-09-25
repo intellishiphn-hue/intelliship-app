@@ -1,18 +1,21 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { createUserWithEmailAndPassword, signOut } from 'firebase/auth'
-import { collection, doc, onSnapshot, setDoc } from 'firebase/firestore'
+import { collection, doc, onSnapshot, orderBy, query, setDoc } from 'firebase/firestore'
 import { authSecundaria, db } from '../lib/firebase'
 import { useAuth } from '../contexts/AuthContext'
 import type { Rol } from '../contexts/AuthContext'
 import './Usuarios.css'
 
-type UsuarioRow = { uid: string; rol: Rol; correo?: string }
+type UsuarioRow = { uid: string; rol: Rol; correo?: string; empleadoId?: string }
+type Empleado = { id: string; nombre: string; activo?: boolean }
 
 export default function Usuarios() {
   const { rol: miRol } = useAuth()
   const [usuarios, setUsuarios] = useState<UsuarioRow[]>([])
+  const [empleados, setEmpleados] = useState<Empleado[]>([])
   const [correo, setCorreo] = useState('')
   const [rolNuevo, setRolNuevo] = useState<Rol>('empleado')
+  const [empleadoIdNuevo, setEmpleadoIdNuevo] = useState('')
   const [creando, setCreando] = useState(false)
   const [mensaje, setMensaje] = useState<{ tipo: 'ok' | 'error'; texto: string } | null>(null)
 
@@ -20,8 +23,16 @@ export default function Usuarios() {
     const unsub = onSnapshot(collection(db, 'usuarios'), (snap) => {
       setUsuarios(snap.docs.map((d) => ({ uid: d.id, ...(d.data() as Omit<UsuarioRow, 'uid'>) })))
     })
-    return unsub
+    const unsub2 = onSnapshot(query(collection(db, 'empleados'), orderBy('nombre')), (snap) => {
+      setEmpleados(snap.docs.map((d) => ({ id: d.id, ...(d.data() as Omit<Empleado, 'id'>) })))
+    })
+    return () => {
+      unsub()
+      unsub2()
+    }
   }, [])
+
+  const empleadoIdsVinculados = new Set(usuarios.map((u) => u.empleadoId).filter(Boolean))
 
   async function crearUsuario(e: FormEvent) {
     e.preventDefault()
@@ -35,11 +46,13 @@ export default function Usuarios() {
       await setDoc(doc(db, 'usuarios', cred.user.uid), {
         rol: rolNuevo,
         correo: correoLimpio,
+        ...(empleadoIdNuevo ? { empleadoId: empleadoIdNuevo } : {}),
       })
       await signOut(authSecundaria)
       setMensaje({ tipo: 'ok', texto: `Cuenta creada para ${correoLimpio}. Su clave para entrar es su mismo correo.` })
       setCorreo('')
       setRolNuevo('empleado')
+      setEmpleadoIdNuevo('')
     } catch (err: unknown) {
       const codigo = (err as { code?: string })?.code
       const texto =
@@ -56,6 +69,10 @@ export default function Usuarios() {
 
   async function cambiarRol(uid: string, nuevoRol: Rol) {
     await setDoc(doc(db, 'usuarios', uid), { rol: nuevoRol }, { merge: true })
+  }
+
+  async function cambiarEmpleadoVinculado(uid: string, empleadoId: string) {
+    await setDoc(doc(db, 'usuarios', uid), { empleadoId: empleadoId || null }, { merge: true })
   }
 
   if (miRol !== 'admin') {
@@ -94,6 +111,17 @@ export default function Usuarios() {
             <option value="admin">Administrador</option>
           </select>
         </div>
+        <div>
+          <label>Empleado vinculado (opcional)</label>
+          <select value={empleadoIdNuevo} onChange={(e) => setEmpleadoIdNuevo(e.target.value)}>
+            <option value="">— Ninguno —</option>
+            {empleados.map((emp) => (
+              <option key={emp.id} value={emp.id} disabled={empleadoIdsVinculados.has(emp.id)}>
+                {emp.nombre}{emp.activo === false ? ' (inactivo)' : ''}{empleadoIdsVinculados.has(emp.id) ? ' — ya vinculado' : ''}
+              </option>
+            ))}
+          </select>
+        </div>
         <button className="btn-primary" type="submit" disabled={creando}>
           {creando ? 'Creando...' : '+ Crear usuario'}
         </button>
@@ -110,6 +138,7 @@ export default function Usuarios() {
               <tr>
                 <th>Correo</th>
                 <th>Rol</th>
+                <th>Empleado vinculado</th>
               </tr>
             </thead>
             <tbody>
@@ -123,6 +152,23 @@ export default function Usuarios() {
                       <option value="admin">Administrador</option>
                     </select>
                   </td>
+                  <td>
+                    <select
+                      value={u.empleadoId || ''}
+                      onChange={(e) => cambiarEmpleadoVinculado(u.uid, e.target.value)}
+                    >
+                      <option value="">— Ninguno —</option>
+                      {empleados.map((emp) => (
+                        <option
+                          key={emp.id}
+                          value={emp.id}
+                          disabled={empleadoIdsVinculados.has(emp.id) && u.empleadoId !== emp.id}
+                        >
+                          {emp.nombre}{emp.activo === false ? ' (inactivo)' : ''}
+                        </option>
+                      ))}
+                    </select>
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -131,7 +177,9 @@ export default function Usuarios() {
       </div>
       <p className="usr-nota">
         La clave de cada usuario es su propio correo. No hay opcion de "olvide mi clave" porque no
-        hace falta: siempre es el mismo correo.
+        hace falta: siempre es el mismo correo. Vincular una cuenta con su empleado hace que el reloj
+        marcador de Asistencia sepa automaticamente quien es, sin tener que elegir su nombre de una
+        lista (asi nadie puede marcar por otra persona).
       </p>
     </div>
   )
