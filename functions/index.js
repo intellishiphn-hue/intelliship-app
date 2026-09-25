@@ -20,6 +20,14 @@
  *
  * Cada plantilla debe tener exactamente las variables de cuerpo en el
  * mismo orden que se manda aqui abajo (ver comentarios en cada funcion).
+ *
+ * WHATSAPP_TEMPLATE_ESTADO se usa dos veces: cuando cambia el estado de un
+ * envio de Carga China (notificarCambioEstadoEnvio) Y cuando se recibe un
+ * paquete nuevo (notificarRecibidoChina, manda el estado inicial). Es el
+ * mismo comportamiento que tenia el panel viejo (avisar en cada paso del
+ * seguimiento), solo que ahi usaba dos plantillas distintas para el primer
+ * aviso y los siguientes -- aca se unifico en una sola para no pedir una
+ * tercera plantilla en Meta.
  */
 
 const { initializeApp } = require('firebase-admin/app')
@@ -191,6 +199,52 @@ exports.notificarCambioEstadoEnvio = onDocumentUpdated(
       telefono: cliente.telefono || null,
       destinatario: cliente.nombre || null,
       estadoNuevo: despues.estado,
+      ...resultado,
+    })
+  }
+)
+
+
+// Se dispara cuando se crea un recibo nuevo de Carga China (paquete
+// recibido en la bodega de China). Usa la MISMA plantilla que los cambios
+// de estado (WHATSAPP_TEMPLATE_ESTADO) mandando el estado inicial como
+// "nuevo estado" -- asi el cliente recibe WhatsApp desde el primer momento
+// que su paquete entra al sistema, no solo en cambios posteriores. (El
+// panel viejo usaba una plantilla separada para este primer aviso; se opto
+// por reusar la misma para no pedirle a Sergio que configure una tercera
+// plantilla en Meta -- si se prefiere un mensaje distinto para este primer
+// aviso, se puede separar despues con su propio WHATSAPP_TEMPLATE_RECIBIDO.)
+exports.notificarRecibidoChina = onDocumentCreated(
+  { document: 'chinaRecibos/{reciboId}', secrets: [WHATSAPP_TOKEN, WHATSAPP_PHONE_NUMBER_ID, WHATSAPP_TEMPLATE_ESTADO] },
+  async (event) => {
+    const recibo = event.data?.data()
+    if (!recibo?.clienteId) return
+
+    const clienteSnap = await db.collection('chinaClientes').doc(recibo.clienteId).get()
+    const cliente = clienteSnap.data()
+    if (!cliente) {
+      await registrarLog({
+        tipo: 'recibido_china',
+        reciboId: event.params.reciboId,
+        exito: false,
+        error: 'Cliente no encontrado',
+      })
+      return
+    }
+
+    const resultado = await enviarPlantillaWhatsapp({
+      telefono: cliente.telefono,
+      plantilla: WHATSAPP_TEMPLATE_ESTADO.value() || 'cambio_estado_envio',
+      parametros: [cliente.nombre || 'cliente', recibo.contenido || cliente.casillero || 'su envio', recibo.estado],
+    })
+
+    await registrarLog({
+      tipo: 'recibido_china',
+      reciboId: event.params.reciboId,
+      clienteId: recibo.clienteId,
+      telefono: cliente.telefono || null,
+      destinatario: cliente.nombre || null,
+      estadoNuevo: recibo.estado,
       ...resultado,
     })
   }

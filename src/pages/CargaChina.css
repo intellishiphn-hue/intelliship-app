@@ -335,3 +335,16 @@
 .cc-adjuntos a {
   color: var(--color-accent, #2dd6e0);
 }
+
+.cc-historial-recibo {
+  margin-top: 4px;
+  font-size: 0.8em;
+}
+.cc-historial-recibo summary {
+  cursor: pointer;
+  color: var(--color-texto-suave, #666);
+}
+.cc-historial-recibo ul {
+  margin: 4px 0 0;
+  padding-left: 16px;
+}

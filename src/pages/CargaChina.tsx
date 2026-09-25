@@ -54,6 +54,8 @@ type Recibo = {
   contenido: string
   cbm: string
   estado: string
+  fechaCreacion?: string
+  historialEstados?: HistorialItem[]
   numeroWR?: string
   peso?: string
   pesoUnidad?: string
@@ -373,7 +375,10 @@ function TabContenedores({
     try {
       const batch = writeBatch(db)
       reciborsDelContenedor.forEach((r) => {
-        batch.update(doc(db, 'chinaRecibos', r.id), { estado: cont.estado })
+        batch.update(doc(db, 'chinaRecibos', r.id), {
+          estado: cont.estado,
+          historialEstados: [...(r.historialEstados || []), { estado: cont.estado, fecha: hoy() }],
+        })
       })
       await batch.commit()
     } catch (err) {
@@ -530,7 +535,12 @@ function TabRecibos({
       const estadoInicial = form.contenedorId
         ? contenedorPorId[form.contenedorId]?.estado || ESTADOS_CHINA[0]
         : ESTADOS_CHINA[0]
-      const docRef = await addDoc(collection(db, 'chinaRecibos'), { ...form, estado: estadoInicial })
+      const docRef = await addDoc(collection(db, 'chinaRecibos'), {
+        ...form,
+        estado: estadoInicial,
+        fechaCreacion: hoy(),
+        historialEstados: [{ estado: estadoInicial, fecha: hoy() }],
+      })
       const extra: Record<string, string> = {}
       if (factura) {
         extra.facturaUrl = await subirArchivo(docRef.id, 'factura', factura)
@@ -560,9 +570,12 @@ function TabRecibos({
     }
   }
 
-  async function cambiarEstado(id: string, estado: string) {
+  async function cambiarEstado(rec: Recibo, estado: string) {
     try {
-      await updateDoc(doc(db, 'chinaRecibos', id), { estado })
+      await updateDoc(doc(db, 'chinaRecibos', rec.id), {
+        estado,
+        historialEstados: [...(rec.historialEstados || []), { estado, fecha: hoy() }],
+      })
     } catch (err) {
       console.error(err)
       setError('No se pudo actualizar el estado.')
@@ -682,6 +695,7 @@ function TabRecibos({
                 <th>WR / Peso</th>
                 <th>Adjuntos</th>
                 <th>Contenedor</th>
+                <th>Recibido</th>
                 <th>Estado</th>
                 <th></th>
               </tr>
@@ -719,14 +733,27 @@ function TabRecibos({
                     {!r.facturaUrl && !r.packingUrl && !r.fotoUrl && '—'}
                   </td>
                   <td>{r.contenedorId ? contenedorPorId[r.contenedorId]?.nombre || '—' : 'Sin asignar'}</td>
+                  <td>{r.fechaCreacion || '—'}</td>
                   <td>
-                    <select className="cc-recibo-estado" value={r.estado} onChange={(e) => cambiarEstado(r.id, e.target.value)}>
+                    <select className="cc-recibo-estado" value={r.estado} onChange={(e) => cambiarEstado(r, e.target.value)}>
                       {ESTADOS_CHINA.map((op) => (
                         <option key={op} value={op}>
                           {op}
                         </option>
                       ))}
                     </select>
+                    {(r.historialEstados || []).length > 1 && (
+                      <details className="cc-historial-recibo">
+                        <summary>Historial ({(r.historialEstados || []).length})</summary>
+                        <ul>
+                          {(r.historialEstados || []).map((h, i) => (
+                            <li key={i}>
+                              <b>{h.fecha}</b> — {h.estado}
+                            </li>
+                          ))}
+                        </ul>
+                      </details>
+                    )}
                   </td>
                   <td>
                     {esAdmin && (
