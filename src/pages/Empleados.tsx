@@ -105,6 +105,7 @@ export default function Empleados() {
   const [cargando, setCargando] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [mostrarForm, setMostrarForm] = useState(false)
+  const [editandoId, setEditandoId] = useState<string | null>(null)
   const [form, setForm] = useState(VACIO)
   const [guardando, setGuardando] = useState(false)
   const [expandido, setExpandido] = useState<string | null>(null)
@@ -126,28 +127,76 @@ export default function Empleados() {
     return unsub
   }, [])
 
-  async function agregarEmpleado(e: FormEvent) {
+  function abrirNuevo() {
+    setForm(VACIO)
+    setEditandoId(null)
+    setMostrarForm(true)
+  }
+
+  function abrirEdicion(emp: Empleado) {
+    setForm({
+      nombre: emp.nombre || '',
+      apodo: emp.apodo || '',
+      puesto: emp.puesto || '',
+      departamento: emp.departamento || '',
+      correo: emp.correo || '',
+      telefono: emp.telefono || '',
+      direccion: emp.direccion || '',
+      estadoCivil: emp.estadoCivil || '',
+      genero: emp.genero || '',
+      fechaNacimiento: emp.fechaNacimiento || '',
+      fechaIngreso: emp.fechaIngreso || '',
+      contactoEmergencia: emp.contactoEmergencia || '',
+    })
+    setEditandoId(emp.id)
+    setMostrarForm(true)
+  }
+
+  function cerrarForm() {
+    setMostrarForm(false)
+    setEditandoId(null)
+    setForm(VACIO)
+  }
+
+  async function guardarForm(e: FormEvent) {
     e.preventDefault()
     if (!form.nombre.trim()) return
     setGuardando(true)
     try {
-      await addDoc(collection(db, 'empleados'), {
-        ...form,
-        activo: true,
-        creadoEl: serverTimestamp(),
-      })
-      setForm(VACIO)
-      setMostrarForm(false)
+      if (editandoId) {
+        await setDoc(doc(db, 'empleados', editandoId), { ...form }, { merge: true })
+      } else {
+        await addDoc(collection(db, 'empleados'), {
+          ...form,
+          activo: true,
+          creadoEl: serverTimestamp(),
+        })
+      }
+      cerrarForm()
     } catch (err) {
       console.error(err)
-      setError('No se pudo guardar el empleado.')
+      setError(editandoId ? 'No se pudo guardar los cambios.' : 'No se pudo guardar el empleado.')
     } finally {
       setGuardando(false)
     }
   }
 
-  async function eliminarEmpleado(id: string) {
-    if (!confirm('¿Eliminar este empleado? Esta accion no se puede deshacer.')) return
+  async function alternarActivo(emp: Empleado) {
+    const estaActivo = emp.activo !== false
+    const confirmado = estaActivo
+      ? confirm(`Marcar a ${emp.nombre} como inactivo (ya no trabaja). Su informacion se conserva, solo se mueve a la lista de inactivos. ¿Continuar?`)
+      : confirm(`Reactivar a ${emp.nombre}. ¿Continuar?`)
+    if (!confirmado) return
+    try {
+      await setDoc(doc(db, 'empleados', emp.id), { activo: !estaActivo }, { merge: true })
+    } catch (err) {
+      console.error(err)
+      setError('No se pudo actualizar el estado del empleado.')
+    }
+  }
+
+  async function eliminarEmpleado(id: string, nombre: string) {
+    if (!confirm(`Eliminar definitivamente a ${nombre}. Esta accion no se puede deshacer y se pierde toda su informacion. Si solo ya no trabaja aqui, usa "Marcar inactivo" en vez de esto. ¿Eliminar de todas formas?`)) return
     try {
       await deleteDoc(doc(db, 'empleados', id))
     } catch (err) {
@@ -162,7 +211,7 @@ export default function Empleados() {
 
   function filaDetalle(emp: Empleado) {
     if (expandido !== emp.id) return null
-    const cols = 6 + (esAdmin ? 2 : 0) + 1
+    const cols = 7 + (esAdmin ? 2 : 0) + 1
     return (
       <tr className="emp-detalle-row" key={emp.id + '-detalle'}>
         <td colSpan={cols}>
@@ -218,9 +267,23 @@ export default function Empleados() {
                 <td>{emp.fechaIngreso || '—'}</td>
                 {esAdmin && <CeldaConfidencial empleadoId={emp.id} />}
                 <td>
-                  <button className="emp-del" onClick={() => eliminarEmpleado(emp.id)} title="Eliminar">
-                    ✕
-                  </button>
+                  <div className="emp-row-actions">
+                    <button className="emp-edit" onClick={() => abrirEdicion(emp)} title="Editar">
+                      ✎
+                    </button>
+                    <button
+                      className="emp-toggle"
+                      onClick={() => alternarActivo(emp)}
+                      title={emp.activo === false ? 'Reactivar' : 'Marcar inactivo (ya no trabaja)'}
+                    >
+                      {emp.activo === false ? '↺' : '⏻'}
+                    </button>
+                    {esAdmin && (
+                      <button className="emp-del" onClick={() => eliminarEmpleado(emp.id, emp.nombre)} title="Eliminar definitivamente">
+                        ✕
+                      </button>
+                    )}
+                  </div>
                 </td>
               </tr>
               {filaDetalle(emp)}
@@ -236,9 +299,9 @@ export default function Empleados() {
       <div className="emp-head">
         <div>
           <h1>Empleados</h1>
-          <p>{empleados.length} {empleados.length === 1 ? 'empleado registrado' : 'empleados registrados'}</p>
+          <p>{activos.length} {activos.length === 1 ? 'empleado activo' : 'empleados activos'}{inactivos.length > 0 ? ` · ${inactivos.length} inactivo${inactivos.length === 1 ? '' : 's'}` : ''}</p>
         </div>
-        <button className="btn-primary" onClick={() => setMostrarForm((v) => !v)}>
+        <button className="btn-primary" onClick={() => (mostrarForm ? cerrarForm() : abrirNuevo())}>
           {mostrarForm ? 'Cancelar' : '+ Nuevo empleado'}
         </button>
       </div>
@@ -246,7 +309,8 @@ export default function Empleados() {
       {error && <div className="emp-error">{error}</div>}
 
       {mostrarForm && (
-        <form className="emp-form" onSubmit={agregarEmpleado}>
+        <form className="emp-form" onSubmit={guardarForm}>
+          {editandoId && <div className="emp-form-editando">Editando informacion de {form.nombre || 'empleado'}</div>}
           <div className="emp-form-grid">
             <div>
               <label>Nombre completo</label>
@@ -339,7 +403,7 @@ export default function Empleados() {
             </div>
           </div>
           <button className="btn-primary" type="submit" disabled={guardando}>
-            {guardando ? 'Guardando...' : 'Guardar empleado'}
+            {guardando ? 'Guardando...' : editandoId ? 'Guardar cambios' : 'Guardar empleado'}
           </button>
         </form>
       )}

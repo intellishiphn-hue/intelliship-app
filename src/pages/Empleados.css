@@ -181,3 +181,39 @@
   text-transform: uppercase;
   color: var(--text-tertiary);
 }
+
+.emp-form-editando {
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: 12.5px;
+  font-weight: 600;
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  margin-bottom: 14px;
+}
+
+.emp-row-actions {
+  display: flex;
+  gap: 4px;
+}
+
+.emp-edit,
+.emp-toggle {
+  border: none;
+  background: transparent;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  font-size: 13px;
+  padding: 4px 8px;
+  border-radius: 6px;
+}
+
+.emp-edit:hover {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.emp-toggle:hover {
+  background: var(--surface-border);
+  color: var(--text);
+}
