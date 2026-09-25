@@ -1,0 +1,272 @@
+.buz-page {
+  padding: 28px 32px 48px;
+  max-width: 900px;
+}
+
+.buz-head {
+  margin-bottom: 20px;
+}
+
+.buz-head h1 {
+  font-size: 22px;
+  font-weight: 700;
+  margin: 0 0 4px;
+  color: var(--text);
+}
+
+.buz-head p {
+  margin: 0;
+  color: var(--text-tertiary);
+  font-size: 13px;
+}
+
+.buz-error {
+  background: var(--red-soft);
+  color: var(--red);
+  font-size: 13px;
+  font-weight: 600;
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  margin-bottom: 16px;
+}
+
+.buz-form {
+  background: var(--surface);
+  border: 1px solid var(--surface-border);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  margin-bottom: 24px;
+  box-shadow: var(--shadow-card);
+}
+
+.buz-form-grid {
+  display: grid;
+  grid-template-columns: 220px;
+  gap: 14px;
+  margin-bottom: 12px;
+}
+
+.buz-form label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 5px;
+}
+
+.buz-form select {
+  width: 100%;
+  border: 1px solid var(--surface-border);
+  border-radius: var(--radius-sm);
+  padding: 9px 11px;
+  font-size: 13px;
+  font-family: var(--font);
+  color: var(--text);
+  background: var(--surface);
+}
+
+.buz-textarea {
+  width: 100%;
+  border: 1px solid var(--surface-border);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  font-size: 13px;
+  font-family: var(--font);
+  color: var(--text);
+  background: var(--surface);
+  resize: vertical;
+}
+
+.buz-textarea:focus,
+.buz-form select:focus {
+  outline: 2px solid var(--accent-soft);
+  border-color: var(--accent);
+}
+
+.buz-form-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 14px;
+  flex-wrap: wrap;
+}
+
+.buz-como {
+  font-size: 12px;
+  color: var(--text-tertiary);
+}
+
+.buz-confirmacion {
+  margin: 10px 0 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--green);
+}
+
+.buz-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+
+.buz-tab {
+  border: 1px solid var(--surface-border);
+  background: var(--surface);
+  color: var(--text-secondary);
+  font-size: 12.5px;
+  font-weight: 600;
+  padding: 8px 14px;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.buz-tab-activo {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+.buz-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.buz-fila-card {
+  background: var(--surface);
+  border: 1px solid var(--surface-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+}
+
+.buz-fila-head {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 18px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+  font-family: var(--font);
+}
+
+.buz-fila-abierta .buz-fila-head {
+  border-bottom: 1px solid var(--surface-border);
+}
+
+.buz-badge {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 9px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.buz-badge-nuevo {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.buz-badge-revisado {
+  background: var(--green-soft);
+  color: var(--green);
+}
+
+.buz-badge-archivado {
+  background: var(--bg);
+  color: var(--text-tertiary);
+}
+
+.buz-fila-categoria {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.buz-fila-nombre {
+  flex: 1;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.buz-fila-fecha {
+  font-size: 12px;
+  color: var(--text-tertiary);
+  white-space: nowrap;
+}
+
+.buz-fila-body {
+  padding: 14px 18px 18px;
+}
+
+.buz-mensaje {
+  font-size: 13.5px;
+  color: var(--text);
+  margin: 0 0 14px;
+  white-space: pre-wrap;
+}
+
+.buz-nota-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  margin-bottom: 6px;
+}
+
+.buz-nota {
+  margin-bottom: 12px;
+}
+
+.buz-fila-acciones {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.buz-btn-secundario {
+  border: 1px solid var(--surface-border);
+  background: var(--surface);
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+
+.buz-del {
+  border: none;
+  background: transparent;
+  color: var(--red);
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: 6px;
+}
+
+.buz-del:hover {
+  background: var(--red-soft);
+}
+
+@media (max-width: 640px) {
+  .buz-form-grid {
+    grid-template-columns: 1fr;
+  }
+  .buz-fila-head {
+    flex-wrap: wrap;
+  }
+  .buz-fila-nombre {
+    flex: 1 0 100%;
+    order: 3;
+  }
+}

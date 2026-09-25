@@ -131,5 +131,15 @@ service cloud.firestore {
       allow read: if esCoordinadorOAdmin();
       allow write: if false;
     }
+
+    // Buzon Intelliship: cualquier autenticado puede enviar un reporte
+    // (create), pero solo admin/coordinador pueden leer la bandeja, marcar
+    // estado o agregar nota interna. Borrar definitivamente es solo admin.
+    match /buzon/{id} {
+      allow read: if esCoordinadorOAdmin();
+      allow create: if estaAutenticado();
+      allow update: if esCoordinadorOAdmin();
+      allow delete: if esAdmin();
+    }
   }
 }

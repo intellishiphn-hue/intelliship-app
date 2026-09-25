@@ -11,6 +11,7 @@ import GuiasNacionales from './pages/GuiasNacionales'
 import EnvioGuias from './pages/EnvioGuias'
 import CargaChina from './pages/CargaChina'
 import Documentos from './pages/Documentos'
+import Buzon from './pages/Buzon'
 import Login from './pages/Login'
 import Empleados from './pages/Empleados'
 import Usuarios from './pages/Usuarios'
@@ -40,7 +41,7 @@ export default function App() {
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/" element={<PanelLayout><Dashboard /></PanelLayout>} />
-          <Route path="/buzon" element={<PanelLayout><Placeholder title="Buzon Intelliship" /></PanelLayout>} />
+          <Route path="/buzon" element={<PanelLayout><Buzon /></PanelLayout>} />
           <Route path="/guias" element={<PanelLayout><EnvioGuias /></PanelLayout>} />
           <Route path="/guias-nacionales" element={<PanelLayout><GuiasNacionales /></PanelLayout>} />
           <Route path="/bodega" element={<PanelLayout><Bodega /></PanelLayout>} />
